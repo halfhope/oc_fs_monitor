@@ -19,3 +19,10 @@
 * feature: Added gzip compression for scan results
 * perf: Revised the comparison algorithm for scans
 
+#### 1.1.1
+
+* feature: Added a widget to the admin dashboard
+* feature: Added syntax highlighting for Twig files
+* fix: Added tooltips for module settings
+* fix: Added pagination limit check
+
