@@ -2,7 +2,7 @@
 <modification>
 	<name>FSMonitor - filesystem monitoring</name>
 	<code>fs_monitor</code>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<author>halfhope</author>
 	<link>https://shtt.blog/</link>
 	<file path="admin/controller/common/dashboard.php">

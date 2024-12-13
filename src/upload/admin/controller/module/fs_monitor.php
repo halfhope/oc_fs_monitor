@@ -7,7 +7,7 @@ class ControllerModuleFsMonitor extends Controller {
 
 	private	$_route 			= 'module/fs_monitor';
 	private	$_model 			= 'model_module_fs_monitor';
-	private $_version 			= '1.2.1';
+	private $_version 			= '1.2.2';
 	private	$_dashboard_route	= 'dashboard/fs_monitor';
 	private	$_extensions_route 	= 'extension/module';
 
@@ -396,6 +396,12 @@ class ControllerModuleFsMonitor extends Controller {
 			$data['security_fs_cron_notify'] = $this->request->post['security_fs_cron_notify'];
 		} else {
 			$data['security_fs_cron_notify'] = $this->config->get('security_fs_cron_notify');
+		}
+
+		if (isset($this->request->post['security_fs_emails'])) {
+			$data['security_fs_emails'] = $this->request->post['security_fs_emails'];
+		} else {
+			$data['security_fs_emails'] = $this->config->get('security_fs_emails');
 		}
 
 		$data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
