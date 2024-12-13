@@ -28,6 +28,7 @@ $_['text_date_format_short']     = 'F j';
 $_['text_legend_module']  = 'Module';
 $_['text_legend_scanner'] = 'Scanner';
 $_['text_legend_cron']    = 'Cron';
+$_['text_legend_notify']  = 'Notifications';
 
 // Columns
 $_['text_column_name']   = 'Name';
@@ -58,8 +59,23 @@ $_['entry_cron_save']           = 'Save cron scan';
 $_['entry_cron_save_help']      = 'Scans executed by cron will be added as a simple scans';
 $_['entry_cron_notify']         = 'Notify on changes';
 $_['entry_cron_notify_help']    = 'You\'ll be notified if there will be changes in the file system';
-$_['entry_emails'] 	            = 'Email for notifications';
-$_['entry_emails_help'] 	    = 'Separated by commas';
+$_['entry_notify_to'] 	        = 'Notify to';
+
+$_['tab_email'] 	            = 'Email';
+$_['tab_whatsapp'] 	            = 'WhatsApp';
+$_['tab_telegramm'] 	        = 'Telegram';
+
+$_['entry_e_emails'] 	        = 'Email';
+$_['entry_e_emails_help'] 	    = 'Separated by commas';
+
+$_['entry_w_phone_number'] 	        = 'Phone number';
+$_['entry_w_business_account_id'] 	= 'Business account ID';
+$_['entry_w_api_token'] 	        = 'API token';
+$_['text_whatsapp_help'] 	        = 'A business account with a linked phone number is required. Instructions are available <a href="https://turivishal.medium.com/permanent-access-token-for-whatsapp-business-apis-c81e1dfc86c7" target="_blank">here</a>';
+
+$_['entry_t_api_token'] 	        = 'API token';
+$_['entry_t_channel_id'] 	        = 'Channel ID';
+$_['text_telegram_help'] 	        = 'Instructions for creating a bot and obtaining an API token are available <a href="https://medium.com/@Myreviewbites/how-to-send-message-through-telegram-bot-api-3c3530a53685" target="_blank">here</a>';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'days';

@@ -1,7 +1,7 @@
 {{ header }}
 {{ column_left }}
 <div id="content">
-<style>.form-group+.form-group{border:none}</style>
+<style>.row mb-3+.row mb-3{border:none}</style>
 	<div class="page-header">
 		<div class="container-fluid">
 			<div class="float-end">
@@ -105,21 +105,21 @@
 						<div class="row mb-3">
 							<label class="col-sm-2 col-form-label" for="input-cron-wget">{{ entry_cron_wget }}</label>
 							<div class="col-sm-10">
-								<input type="text" data-default="{{ security_fs_cron_wget }}" value="{{ security_fs_cron_wget }}" id="input-cron-wget" class="form-control" readonly="1" />
+								<input type="text" data-default="{{ security_fs_cron_wget }}" value="{{ security_fs_cron_wget }}" id="input-cron-wget" class="form-control" readonly="1" disabled/>
 							</div>
 						</div>
 
 						<div class="row mb-3">
 							<label class="col-sm-2 col-form-label" for="input-cron-curl">{{ entry_cron_curl }}</label>
 							<div class="col-sm-10">
-								<input type="text" data-default="{{ security_fs_cron_curl }}" value="{{ security_fs_cron_curl }}" id="input-cron-curl" class="form-control" readonly="1" />
+								<input type="text" data-default="{{ security_fs_cron_curl }}" value="{{ security_fs_cron_curl }}" id="input-cron-curl" class="form-control" readonly="1" disabled/>
 							</div>
 						</div>
 
 						<div class="row mb-3">
 							<label class="col-sm-2 col-form-label" for="input-cron-cli">{{ entry_cron_cli }}</label>
 							<div class="col-sm-10">
-								<input type="text" data-default="{{ security_fs_cron_cli }}" value="{{ security_fs_cron_cli }}" id="input-cron-cli" class="form-control" readonly="1" />
+								<input type="text" data-default="{{ security_fs_cron_cli }}" value="{{ security_fs_cron_cli }}" id="input-cron-cli" class="form-control" readonly="1" disabled/>
 							</div>
 						</div>
 
@@ -147,8 +147,15 @@
 							</div>
 						</div>
 
+					</fieldset>
+
+					<fieldset>
+
+						<legend>{{ text_legend_notify }}</legend>
+
 						<div class="row mb-3">
-							<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_notify_help }}">{{ entry_cron_notify }}</span></label>
+							
+							<label for="" class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_notify_help }}">{{ entry_cron_notify }}</span></label>
 							<div class="col-sm-10">
 								<label class="radio-inline">
 									{% if security_fs_cron_notify %}
@@ -160,7 +167,7 @@
 									{% endif %}
 								</label>
 								<label class="radio-inline">
-									{% if security_fs_cron_notify == false %}
+									{% if not security_fs_cron_notify %}
 									<input type="radio" name="security_fs_cron_notify" value="0" checked="checked" />
 									{{ text_no }}
 									{% else %}
@@ -169,17 +176,84 @@
 									{% endif %}
 								</label>
 							</div>
+						
 						</div>
-
+						
 						<div class="row mb-3">
-							<label for="input-emails" class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_emails_help }}">{{ entry_emails }}</span></label>
+							<label for="" class="col-sm-2 col-form-label">{{ entry_notify_to }}</label>
 							<div class="col-sm-10">
-								<input type="text" name="security_fs_emails" id="input-emails" class="form-control" value="{{ security_fs_emails }}"></textarea>
+								<select name="security_fs_notify_to" id="#input-notify-to" class="form-control">
+									<option value="email" {{ security_fs_notify_to == 'email' ? 'selected' : '' }}>{{ tab_email }}</option>
+									<option value="whatsapp" {{ security_fs_notify_to == 'whatsapp' ? 'selected' : '' }}>{{ tab_whatsapp }}</option>
+									<option value="telegram" {{ security_fs_notify_to == 'telegram' ? 'selected' : '' }}>{{ tab_telegramm }}</option>
+								</select>
 							</div>
+						</div>	
+						
+						<ul class="nav nav-tabs">
+							<li class="nav-item" class="active"><a class="nav-link active" data-bs-toggle="tab" href="#tab-email">{{ tab_email }}</a></li>
+							<li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-whatsapp">{{ tab_whatsapp }}</a></li>
+							<li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-telegram">{{ tab_telegramm }}</a></li>
+						</ul>
+
+						<div class="tab-content">
+
+							<div class="tab-pane active" id="tab-email">
+								
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_e_emails_help }}">{{ entry_e_emails }}</span></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_e_emails" id="input-emails" class="form-control" value="{{ security_fs_e_emails }}">
+									</div>
+								</div>
+							
+							</div>
+							
+							<div class="tab-pane" id="tab-whatsapp">
+								
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label">{{ entry_w_phone_number }}</label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_phone_number" id="input-emails" class="form-control" value="{{ security_fs_w_phone_number }}">
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label">{{ entry_w_business_account_id }}</label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_business_account_id" id="input-emails" class="form-control" value="{{ security_fs_w_business_account_id }}">
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label">{{ entry_w_api_token }}</label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_api_token" id="input-emails" class="form-control" value="{{ security_fs_w_api_token }}">
+									</div>
+								</div>
+								<div class="help-block">{{ text_whatsapp_help }}</div>
+							</div>
+
+							<div class="tab-pane" id="tab-telegram">
+
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label">{{ entry_t_api_token }}</label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_t_api_token" id="input-emails" class="form-control" value="{{ security_fs_t_api_token }}">
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label">{{ entry_t_channel_id }}</label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_t_channel_id" id="input-emails" class="form-control" value="{{ security_fs_t_channel_id }}">
+									</div>
+								</div>
+
+								<div class="help-block">{{ text_telegram_help }}</div>
+							</div>
+
 						</div>
 
 					</fieldset>
-
 				</form>
 			</div>
 		</div>

@@ -49,6 +49,7 @@ $_['text_date_format_short']		= 'j. F';
 $_['text_legend_module']			= 'Module';
 $_['text_legend_scanner']			= 'Scanner';
 $_['text_legend_cron_opencart']		= 'Сron - OpenCart';
+$_['text_legend_notify']            = 'Benachrichtigungen';
 
 // Columns
 $_['text_column_name']				= 'Name';
@@ -80,8 +81,23 @@ $_['entry_include_help_block']		= 'Nur absolute Pfade dürfen vewendet werden<br
 $_['entry_exclude']					= 'Ausgenommen Verzeichnisse und Dateien';
 $_['entry_exclude_help']			= 'Pro Zeile eine Angabe';
 $_['entry_exclude_help_block']		= 'Es können sowohl absolute als auch relative Pfade angegeben werden, auch Wildcards *.<br>Beispiel:<ul><li>/var/www/username/www-data/andere_webseite.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
-$_['entry_emails'] 	                = 'E-Mail-Adresse für Benachrichtigungen';
-$_['entry_emails_help'] 	        = 'Geben Sie die Adressen durch Kommas getrennt ein';
+$_['entry_notify_to'] 	            = 'Notify to';
+
+$_['tab_email'] 	                = 'Email';
+$_['tab_whatsapp'] 	                = 'WhatsApp';
+$_['tab_telegramm'] 	            = 'Telegram';
+
+$_['entry_e_emails'] 	            = 'Email';
+$_['entry_e_emails_help'] 	        = 'Durch Kommas getrennt';
+
+$_['entry_w_phone_number'] 	        = 'Telefonnummer';
+$_['entry_w_business_account_id'] 	= 'Geschäftskonto-ID';
+$_['entry_w_api_token'] 	        = 'API token';
+$_['text_whatsapp_help'] 	        = 'Ein Geschäftskonto mit einer verknüpften Telefonnummer ist erforderlich. Anweisungen finden Sie <a href="https://turivishal.medium.com/permanent-access-token-for-whatsapp-business-apis-c81e1dfc86c7" target="_blank">hier</a>';
+
+$_['entry_t_api_token'] 	        = 'API token';
+$_['entry_t_channel_id'] 	        = 'Kanal-ID';
+$_['text_telegram_help'] 	        = 'Anweisungen zur Boten- und Follow-up-API-Token-Lieferung <a href="https://medium.com/@Myreviewbites/how-to-send-message-through-telegram-bot-api-3c3530a53685" target="_blank">heir</a>';
 
 // Interval datetime functions
 $_['text_interval_days']					= 'Tage';
