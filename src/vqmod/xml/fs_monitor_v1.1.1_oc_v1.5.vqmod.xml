@@ -8,7 +8,7 @@
     <file path="admin/controller/common/home.php">
         <operation error="skip">
             <search><![CDATA['common/header',]]></search>
-            <add position="after"><![CDATA['security/fs_monitor/widget',]]></add>
+            <add position="after"><![CDATA['module/fs_monitor/widget',]]></add>
         </operation>
     </file>
 
