@@ -9,7 +9,7 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 
 	private	$_route 			= 'extension/fs_monitor/module/fs_monitor';
 	private	$_model 			= 'model_extension_fs_monitor_module_fs_monitor';
-	private	$_version 			= '1.2.1';
+	private	$_version 			= '1.2.2';
 	private	$_dashboard_route	= 'extension/fs_monitor/module/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 
@@ -390,6 +390,12 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 			$data['security_fs_cron_notify'] = $this->config->get('security_fs_cron_notify');
 		}
 
+		if (isset($this->request->post['security_fs_emails'])) {
+			$data['security_fs_emails'] = $this->request->post['security_fs_emails'];
+		} else {
+			$data['security_fs_emails'] = $this->config->get('security_fs_emails');
+		}
+
 		$data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
 		$data['security_fs_cron_curl'] = '/usr/local/bin/curl -s \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
 		$data['security_fs_cron_cli']  = '/usr/local/bin/php -q \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', DIR_APPLICATION) . 'index.php?route=' . $this->_route . '&access_key=';
@@ -520,7 +526,7 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 
 			return $this->load->view($this->_route . '/widget', $data);
 		} else {
-			return NULL;
+			return '';
 		}
 	}
 
