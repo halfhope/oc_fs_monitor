@@ -5,8 +5,7 @@
 
 class ControllerExtensionModuleFsMonitor extends Controller {
 
-	public 	$_version 				= '1.2';
-	private $_module_route 			= 'extension/module/fs_monitor';
+	private $_route 				= 'extension/module/fs_monitor';
 	private $_model 				= 'model_extension_module_fs_monitor';
 
 	/**
@@ -14,8 +13,8 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 	 * @return void
 	 **/
 	public function index() {
-		$this->load->model($this->_module_route);
-		$this->load->language($this->_module_route);
+		$this->load->model($this->_route);
+		$this->load->language($this->_route);
 		
 		$this->humanizer = new Security\humanizer($this->registry);
 		$this->directory_scanner = new Security\directory_scanner();
@@ -97,7 +96,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 					if ($this->config->get('security_fs_cron_notify')) {
 
 						if ($this->config->get('security_fs_cron_save')) {
-							$link = HTTP_SERVER . $this->config->get('security_fs_admin_dir') .'/index.php?route=' . $this->_module_route . '/viewScan&scan_id=' . $scan['scan_id'];
+							$link = HTTP_SERVER . $this->config->get('security_fs_admin_dir') .'/index.php?route=' . $this->_route . '/viewScan&scan_id=' . $scan['scan_id'];
 							$message .= $this->language->get('text_mail_link') . '<a href="' . $link . '">' . $link . '</a>';
 						}
 

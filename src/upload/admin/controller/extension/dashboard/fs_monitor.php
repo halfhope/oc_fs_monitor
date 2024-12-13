@@ -5,16 +5,16 @@
 
 class ControllerExtensionDashboardFSMonitor extends Controller {
 
-	private $error = [];
-
-	public 	$_version 			= '1.2';
+	private	$_route 			= 'extension/dashboard/fs_monitor';
+	private $_version 			= '1.2.1';
 	private	$_module_route 		= 'extension/module/fs_monitor';
-	private	$_dashboard_route 	= 'extension/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
+
+	private $error = [];
 
 	public function index() {
 		
-		$this->load->language($this->_dashboard_route);
+		$this->load->language($this->_route);
 
 		$this->document->setTitle($this->language->get('heading_title'));
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -59,10 +59,10 @@ class ControllerExtensionDashboardFSMonitor extends Controller {
 
 		$data['breadcrumbs'][]  = [
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link($this->_dashboard_route, 'user_token=' . $this->session->data['user_token'], true)
+			'href' => $this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'], true)
 		];
 
-		$data['action'] = $this->url->link($this->_dashboard_route, 'user_token=' . $this->session->data['user_token'], true);
+		$data['action'] = $this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'], true);
 		$data['cancel'] = $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true);
 
 		if (isset($this->request->post['dashboard_fs_monitor_width'])) {
@@ -93,7 +93,7 @@ class ControllerExtensionDashboardFSMonitor extends Controller {
 	}
 
 	protected function validate() {
-		if (!$this->user->hasPermission('modify', $this->_dashboard_route)) {
+		if (!$this->user->hasPermission('modify', $this->_route)) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 

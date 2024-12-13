@@ -5,8 +5,6 @@
 
 class ModelExtensionModuleFSMonitor extends Model {
 
-	public $_version = '1.2';
-
 	private function pack_data($object) {
 		return base64_encode(gzdeflate(json_encode($object)));
 	}
@@ -20,7 +18,7 @@ class ModelExtensionModuleFSMonitor extends Model {
 		return $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '".(int)$store_id."', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
 	}
 
-	public function getTotalScans(){
+	public function getTotalScans() {
 		$query = $this->db->query("SELECT scan_id FROM `" . DB_PREFIX . "security_filesystem_monitor_generated`");
 		return $query->num_rows;
 	}
@@ -49,7 +47,7 @@ class ModelExtensionModuleFSMonitor extends Model {
 		if ($last_scan->num_rows == 1) {
 			$last_scan->row['scan_data'] = $this->unpack_data($last_scan->row['scan_data']);
 			$to_update = [$scan, $last_scan->row];
-		}else{
+		} else {
 			$to_update = [$scan];
 		}
 
@@ -61,10 +59,10 @@ class ModelExtensionModuleFSMonitor extends Model {
 	}
 
 	public function getScan($scan_id, $full = false) {
-		if($full){
+		if ($full) {
 			$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id WHERE sfmg.scan_id = " . (int) $scan_id);
 			$result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
-		}else{
+		} else {
 			$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg WHERE scan_id = " . (int) $scan_id);
 		}
 		return $result->row;
@@ -82,19 +80,19 @@ class ModelExtensionModuleFSMonitor extends Model {
 
 			if ($last_scan->num_rows == 1) {
 				$last_scan = $this->getScan($last_scan->row['scan_id'], true);
-				$to_update = array($this->getScan($next_scan->row['scan_id'], true), $last_scan);
+				$to_update = [$this->getScan($next_scan->row['scan_id'], true), $last_scan];
 			} else {
-				$to_update = array($this->getScan($next_scan->row['scan_id'], true));
+				$to_update = [$this->getScan($next_scan->row['scan_id'], true)];
 			}
 
 			$scans = $this->fs_scans->getScansDiff($to_update);
 
-			$this->updateScansData(array($scans[0]));
+			$this->updateScansData([$scans[0]]);
 		}
 
 	}
 
-	public function getScans($data = array()) {
+	public function getScans($data = []) {
 		
 		$sql = "SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` ORDER BY scan_id DESC";
 
@@ -114,6 +112,7 @@ class ModelExtensionModuleFSMonitor extends Model {
 	}
 
 	public function getLastScan() {
+		$this->install();
 		$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg ORDER BY sfmg.scan_id DESC LIMIT 0,1");
 		return $result->row;
 	}
@@ -176,4 +175,7 @@ class ModelExtensionModuleFSMonitor extends Model {
 		}
 	}
 
+	public function uninstall() {
+
+	}
 }
