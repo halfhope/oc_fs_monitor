@@ -7,7 +7,7 @@ class ControllerModuleFsMonitor extends Controller {
 
 	private	$_route 			= 'module/fs_monitor';
 	private	$_model 			= 'model_module_fs_monitor';
-	private $_version 			= '1.2.3';
+	private $_version 			= '1.2.3.1';
 	private	$_dashboard_route	= 'dashboard/fs_monitor';
 	private	$_extensions_route 	= 'extension/module';
 
@@ -125,11 +125,7 @@ class ControllerModuleFsMonitor extends Controller {
 		}
 
 		foreach ($scans as $key => $scan) {
-			if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-				$date_key = $this->language->get('text_scans_on') . ' ' . iconv('windows-1251', 'utf-8', strftime('%A %d. %B %Y', strtotime($scan['date_added'])));
-			} else {
-				$date_key = $this->language->get('text_scans_on') . ' ' . strftime('%A %d. %B %Y', strtotime($scan['date_added']));
-			}
+			$date_key = $this->language->get('text_scans_on') . ' ' . date('l jS \of F Y', strtotime($scan['date_added']));
 
 			$scan['scan_size_abs_humanized'] = $this->humanizer->humanBytes($scan['scan_size_abs']);
 			$scan['scan_size_rel_humanized'] = $this->humanizer->humanBytes($scan['scan_size_rel']);
