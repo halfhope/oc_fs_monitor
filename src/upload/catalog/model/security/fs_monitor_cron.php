@@ -2,6 +2,7 @@
 /**
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
+
 class ModelSecurityFSMonitorCron extends Model
 {
 
@@ -13,118 +14,201 @@ class ModelSecurityFSMonitorCron extends Model
 
     }
 
-    public function addScan($name, $user_name, $files, $scan_size)
-    {
-
-        $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor` (scan_size, user_name, name, date_added, scan_data) VALUES (" . (int) $scan_size . ",'" . $this->db->escape($user_name) . "','" . $this->db->escape($name) . "', '" . date('Y-m-d H:i:s') . "', '" . $this->db->escape(base64_encode(gzdeflate(json_encode(array(
-            'scanned' => $files
-        ))))) . "');");
-
-        return $this->db->getLastId();
+    private function pack_data($object){
+        return base64_encode(gzdeflate(json_encode($object)));
     }
 
-    public function getLastScan()
-    {
-        $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor` ORDER BY scan_id DESC LIMIT 0, 1");
+    private function unpack_data($object){
+        return json_decode(gzinflate(base64_decode($object)), true);
+    }
 
-        $result->row['scan_data'] = json_decode(gzinflate(base64_decode($result->row['scan_data'])), true);
+    private function compatibleEditSetting($key, $value, $code, $store_id = 0){
+        $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = '".$this->db->escape($key)."'");
+        if (version_compare('2', VERSION) >= 0) {
+            $code_column_name = 'group';
+        } else {
+            $code_column_name = 'code';
+        }
+        return $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '".(int)$store_id."', `" . $code_column_name . "` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
+    }
+
+    public function addScan($name, $user_name, $files, $scan_size, $auto = false)
+    {
+
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_data` (scan_data) VALUES ('" . $this->db->escape($this->pack_data(array('scanned' => $files))) . "');");
+
+        $scan_id = (int) $this->db->getLastId();
+
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_generated` (scan_id, scan_size, user_name, name, auto, date_added) VALUES (" . (int) $scan_id . "," . (int) $scan_size . ",'" . $this->db->escape($user_name) . "','" . $this->db->escape($name) . "', 1, '" . date('Y-m-d H:i:s') . "');");
+
+        $last_scan = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_data` AS sfmd LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_generated` sfmg ON sfmg.scan_id = sfmd.scan_id WHERE sfmd.scan_id < " . (int) $scan_id . " ORDER BY sfmd.scan_id DESC LIMIT 0, 1");
+
+        $scan = array(
+            'scan_id' => $scan_id,
+            'scan_data' => array(
+                'scanned' => $files,
+            ),
+            'scan_size' => $scan_size,
+        );
+
+        if ($last_scan->num_rows == 1) {
+            $last_scan->row['scan_data'] = $this->unpack_data($last_scan->row['scan_data']);
+            $to_update = array($scan, $last_scan->row);
+        }else{
+            $to_update = array($scan);
+        }
+
+        $scans = $this->fs_scans->getScansDiff($to_update);
+
+        $this->updateScansData(array($scans[0]));
+
+        return $scan_id;
+    }
+
+    public function getScan($scan_id, $full = false)
+    {
+
+        if($full){
+            $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id WHERE sfmg.scan_id = " . (int) $scan_id);
+            $result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
+        }else{
+            $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg WHERE scan_id = " . (int) $scan_id);
+        }
 
         return $result->row;
     }
 
-
-    public function getScanNotification()
+    public function getLastScan()
     {
-
-        return $this->config->get('security_fs_notification');
-
-    }
-
-    public function setScanNotification($text)
-    {
-
-        $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_notification', `value` = '" . $this->db->escape($text) . "'");
-
-    }
-
-    public function removeScanNotification()
-    {
-
-        $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_notification'");
-
+        $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id ORDER BY sfmd.scan_id DESC LIMIT 0,1");
+        $result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
+        return $result->row;
     }
 
     public function getScans()
     {
 
-        $scans = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor` ORDER BY scan_id DESC");
-
-        foreach ($scans->rows as $key => $scan) {
-            $scans->rows[$key]['scan_data'] = json_decode(gzinflate(base64_decode($scan['scan_data'])), true);
-        }
+        $scans = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` ORDER BY scan_id DESC");
 
         return $scans->rows;
     }
 
     public function updateScansData($scans)
     {
-
-        foreach ($scans as $scan) {
-            $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor` SET `scan_data` = '" . $this->db->escape(base64_encode(gzdeflate(json_encode($scan['scan_data'])))) . "' WHERE `scan_id` = " . (int) $scan['scan_id']);
+        foreach ($scans as $key => $scan) {
+            $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_data` SET scan_data = '" . $this->pack_data($scan['scan_data']) . "' WHERE scan_id = " . (int)($scan['scan_id']));
+            $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_generated` SET scan_size_abs = " . (int) $scan['scan_size'] . ", scan_size_rel = " . (int) (($scan['size_up']) ? $scan['scan_size_compared'] : -$scan['scan_size_compared']) . ", new_count = " . (int) $scan['new_count'] . ", changed_count = " . (int) $scan['changed_count'] . ", deleted_count = " . (int) $scan['deleted_count'] . ", scanned_count = " . (int) $scan['scanned_count'] . " WHERE scan_id = " . (int)($scan['scan_id']));
         }
 
     }
 
-    public function checkAndInstall()
+    public function checkAndInstall($replace = false)
     {
 
         $this->db->query("
-        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor`
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_data`
         (
             `scan_id` INT(11) NOT NULL AUTO_INCREMENT,
-            `scan_size` INT(11) NOT NULL,
-            `user_name` VARCHAR(255) NOT NULL,
-            `name` VARCHAR(255) NOT NULL,
-            `date_added` DATETIME,
             `scan_data` MEDIUMTEXT COLLATE utf8_general_ci NOT NULL,
             PRIMARY KEY (`scan_id`)
         )
         ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
         ");
 
+        $this->db->query("
+        CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_generated`
+        (
+            `scan_id` INT(11) NOT NULL,
+            `scan_size` INT(11) NOT NULL,
+            `user_name` VARCHAR(255) NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `scan_size_abs` VARCHAR(20) NOT NULL,
+            `scan_size_rel` VARCHAR(20) NOT NULL,
+            `scanned_count` INT(11) NOT NULL,
+            `new_count` INT(11) NOT NULL,
+            `changed_count` INT(11) NOT NULL,
+            `deleted_count` INT(11) NOT NULL,
+            `auto` tinyint NOT NULL,
+            `date_added` DATETIME,
+            PRIMARY KEY (`scan_id`)
+        )
+        ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
+        ");
+
+        // $this->db->query("ALTER TABLE `" . DB_PREFIX . "security_filesystem_monitor_generated` ADD INDEX `date_added` (`date_added`);");
+
+        $security_fs_admin_dir = $this->config->get('security_fs_admin_dir');
+        if (empty($security_fs_admin_dir) || $replace) {
+            $security_fs_admin_dir = basename(DIR_APPLICATION);
+            $this->compatibleEditSetting('security_fs_admin_dir', $security_fs_admin_dir, 'security_fs');
+        }
+
         $security_fs_base_path = $this->config->get('security_fs_base_path');
-        if (empty($security_fs_base_path)) {
+        if (empty($security_fs_base_path) || $replace) {
             $security_fs_base_path = realpath(DIR_APPLICATION . '..');
-            $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_base_path'");
-            $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_base_path', `value` = '" . $this->db->escape($security_fs_base_path) . "'");
+            $this->compatibleEditSetting('security_fs_base_path', $security_fs_base_path, 'security_fs');
         }
 
         $security_fs_extensions = $this->config->get('security_fs_extensions');
-        if (empty($security_fs_extensions)) {
-            $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_extensions'");
+        if (empty($security_fs_extensions) || $replace) {
             $security_fs_extensions = str_replace('|', PHP_EOL, 'php5|php42|php4|php3|php|tpl|phpt|phps|phtm|phtml|phar|asp|aspx|sh|bash|zsh|csh|tsch|pl|py|pyc|jsp|cgi|cfm|css|js');
-            $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_extensions', `value` = '" . $this->db->escape($security_fs_extensions) . "'");
+            $this->compatibleEditSetting('security_fs_extensions', $security_fs_extensions, 'security_fs');
         }
 
         $security_fs_cron_access_key = $this->config->get('security_fs_cron_access_key');
-        if (empty($security_fs_cron_access_key)) {
-            $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_cron_access_key'");
-            $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_cron_access_key', `value` = '" . $this->db->escape(md5(mt_rand())) . "'");
+        if (empty($security_fs_cron_access_key) || $replace) {
+            $this->compatibleEditSetting('security_fs_cron_access_key', md5(mt_rand()), 'security_fs');
         }
 
         $security_fs_cron_save = $this->config->get('security_fs_cron_save');
-        if (empty($security_fs_cron_save)) {
-            $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_cron_save'");
-            $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_cron_save', `value` = '0'");
+        if (is_null($security_fs_cron_save) || $replace) {
+            $this->compatibleEditSetting('security_fs_cron_save', 1, 'security_fs');
         }
 
         $security_fs_cron_notify = $this->config->get('security_fs_cron_notify');
-        if (empty($security_fs_cron_notify)) {
-            $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_cron_notify'");
-            $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_cron_notify', `value` = '1'");
+        if (is_null($security_fs_cron_notify) || $replace) {
+            $this->compatibleEditSetting('security_fs_cron_notify', 1, 'security_fs');
         }
 
     }
 
+    public function init(){
+        $tables = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "security_filesystem_monitor_backup'");
+
+        if ($tables->num_rows) {
+
+            $this->db->query("TRUNCATE TABLE `" . DB_PREFIX . "security_filesystem_monitor_data`;");
+            $this->db->query("TRUNCATE TABLE `" . DB_PREFIX . "security_filesystem_monitor_generated`;");
+
+            $scans = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_backup` ORDER BY scan_id ASC");
+
+            foreach ($scans->rows as $key => $scan) {
+
+                $scan['scan_data'] = $scans->rows[$key]['scan_data'] = $this->unpack_data($scan['scan_data']);
+
+                $scan['auto'] = ($scan['name'] == $this->language->get('text_cron_scan_name')) ? true : false;
+
+                $scan_data = array(
+                    'scanned'   => $scan['scan_data']['scanned'],
+                    'new'       => $scan['scan_data']['new'],
+                    'changed'   => $scan['scan_data']['changed'],
+                    'deleted'   => $scan['scan_data']['deleted'],
+                );
+
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_data` (scan_data) VALUES ('" . $this->db->escape($this->pack_data($scan_data)) . "');");
+
+                $new_scan_id = $this->db->getLastId();
+
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_generated` (scan_id, scan_size, user_name, name, auto, date_added) VALUES (" . (int) $new_scan_id . "," . (int) $scan['scan_size'] . ",'" . $this->db->escape($scan['user_name']) . "','" . $this->db->escape($scan['name']) . "', " . (int)$scan['auto'] . ", '" . $this->db->escape($scan['date_added']) . "');");
+
+            }
+
+            foreach ($scans->rows as $key => $scan) {
+                $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_generated` SET scan_size_abs = " . (int) $scan['scan_data']['scan_size'] . ", scan_size_rel = " . (int) (($scan['scan_data']['size_up']) ? $scan['scan_data']['scan_size_compared'] : -$scan['scan_data']['scan_size_compared']) . ", new_count = " . (int) $scan['scan_data']['new_count'] . ", changed_count = " . (int) $scan['scan_data']['changed_count'] . ", deleted_count = " . (int) $scan['scan_data']['deleted_count'] . ", scanned_count = " . (int) $scan['scan_data']['scanned_count'] . " WHERE scan_id = " . (int)($scan['scan_id']));
+            }
+        }
+    }
+
 }
+
 ?>

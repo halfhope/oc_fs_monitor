@@ -37,6 +37,19 @@
 
           <fieldset>
 
+            <legend><?php echo $text_legend_module ?></legend>
+
+            <div class="form-group required">
+              <label class="col-sm-2 control-label" for="input-admin-dir"><?php echo $entry_admin_dir; ?></label>
+              <div class="col-sm-10">
+                <input type="text" name="security_fs_admin_dir" value="<?php echo $security_fs_admin_dir; ?>" placeholder="<?php echo $entry_admin_dir; ?>" id="input-admin-dir" class="form-control" />
+              </div>
+            </div>
+
+          </fieldset>
+
+          <fieldset>
+
             <legend><?php echo $text_legend_scanner ?></legend>
 
             <div class="form-group required">

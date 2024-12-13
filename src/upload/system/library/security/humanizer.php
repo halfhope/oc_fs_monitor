@@ -50,6 +50,7 @@ class Humanizer
             " ZB",
             " YB"
         );
+        $size = abs($size);
         return $size ? round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . $filesizename[$i] : '0 Bytes';
     }
 

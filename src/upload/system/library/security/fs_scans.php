@@ -44,7 +44,7 @@ final class FS_scans
 
             if (isset($result[$key + 1]) && !empty($result[$key + 1])) {
                 $size_up                   = (((int) $result[$key + 1]['scan_size'] - $scan_size) <= 0);
-                $result[$key]['scan_data'] = array_merge($result[$key]['scan_data'], array(
+                $result[$key] = array_merge($result[$key], array(
                     'size_up' => $size_up,
                     'scan_size_compared' => abs($size_up ? (int) $result[$key + 1]['scan_size'] - $scan_size : $scan_size - (int) $result[$key + 1]['scan_size']),
                     'scan_size' => $scan_size,
@@ -54,7 +54,7 @@ final class FS_scans
                     'scanned_count' => count($scan['scan_data']['scanned'])
                 ));
             } else {
-                $result[$key]['scan_data'] = array_merge($result[$key]['scan_data'], array(
+                $result[$key] = array_merge($result[$key], array(
                     'size_up' => true,
                     'scan_size_compared' => abs($scan_size),
                     'scan_size' => $scan_size,
@@ -71,6 +71,7 @@ final class FS_scans
 
     private static function getFilesDiff($files_old, $files_new)
     {
+                    try{
 
         $new       = array();
         $changed   = array();
@@ -81,7 +82,8 @@ final class FS_scans
             foreach ($files_old as $file_name => $file_data) {
                 $crc32_key[$file_data['crc']] = $file_data;
                 if (isset($files_new[$file_name])) {
-                    $diff = array_diff_assoc($files_new[$file_name], $file_data);
+                        $diff = array_diff_assoc($files_new[$file_name], $file_data);
+
                     if ($diff) {
                         $changed[$file_name] = array(
                             'old' => $file_data,
@@ -97,6 +99,9 @@ final class FS_scans
                 }
             }
         }
+                    } catch (Exception $e){
+                        var_dump($files_new[$file_name], $e);
+                    }
 
         $deleted = $files_new;
 
