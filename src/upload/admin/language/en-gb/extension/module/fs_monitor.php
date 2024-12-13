@@ -58,6 +58,8 @@ $_['entry_cron_save']           = 'Save cron scan';
 $_['entry_cron_save_help']      = 'Scans executed by cron will be added as a simple scans';
 $_['entry_cron_notify']         = 'Notify on changes';
 $_['entry_cron_notify_help']    = 'You\'ll be notified if there will be changes in the file system';
+$_['entry_emails'] 	            = 'Email for notifications';
+$_['entry_emails_help'] 	    = 'Separated by commas';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'days';

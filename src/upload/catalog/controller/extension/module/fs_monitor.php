@@ -109,13 +109,16 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 						$mail->smtp_port     = $this->config->get('config_mail_smtp_port');
 						$mail->smtp_timeout  = $this->config->get('config_mail_smtp_timeout');
 
-						$mail->setTo($this->config->get('config_email'));
-						$mail->setFrom($this->config->get('config_email'));
-						$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
-						$mail->setSubject(html_entity_decode($this->language->get('text_mail_subject'), ENT_QUOTES, 'UTF-8'));
-						$mail->setHtml(nl2br($message));
-						$mail->setText(strip_tags($message));
-						$mail->send();
+						$emails = $this->config->get('security_fs_emails');
+						foreach (explode(',', $emails) as $email) {
+							$mail->setTo(trim($email));
+							$mail->setFrom($this->config->get('config_email'));
+							$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+							$mail->setSubject(html_entity_decode($this->language->get('text_mail_subject'), ENT_QUOTES, 'UTF-8'));
+							$mail->setHtml(nl2br($message));
+							$mail->setText(strip_tags($message));
+							$mail->send();
+						}
 					}
 				}
 			}

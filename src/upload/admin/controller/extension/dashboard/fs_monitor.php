@@ -6,7 +6,7 @@
 class ControllerExtensionDashboardFSMonitor extends Controller {
 
 	private	$_route 			= 'extension/dashboard/fs_monitor';
-	private $_version 			= '1.2.1';
+	private $_version 			= '1.2.2';
 	private	$_module_route 		= 'extension/module/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 
