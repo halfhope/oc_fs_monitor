@@ -30,6 +30,9 @@ class ControllerSecurityFsMonitor extends CompatibleController
         $exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
         $this->directory_scanner->setExcludePaths($exclude_paths);
 
+        // add default replace path
+        $this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
+        
         // add extensions
         $this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
 
@@ -108,16 +111,17 @@ class ControllerSecurityFsMonitor extends CompatibleController
         } else {
             $page = 1;
         }
-
+        
+        $admin_limit = !empty($this->config->get('config_admin_limit')) ? $this->config->get('config_admin_limit') : 20;
         $data = array(
-            'start'           => ($page - 1) * $this->config->get('config_admin_limit'),
-            'limit'           => $this->config->get('config_admin_limit')
+            'start'           => ($page - 1) * $admin_limit,
+            'limit'           => $admin_limit
         );
 
         $pagination = new Pagination();
         $pagination->total = $this->model_security_fs_monitor->getTotalScans();
         $pagination->page = $page;
-        $pagination->limit = $this->config->get('config_admin_limit');
+        $pagination->limit = $admin_limit;
         $pagination->text = $this->language->get('text_pagination');
         $pagination->url = $this->url->link('security/fs_monitor', 'token=' . $this->session->data['token'] . '&page={page}', 'SSL');
 
@@ -359,12 +363,16 @@ class ControllerSecurityFsMonitor extends CompatibleController
         $this->template_data['text_legend_cron']    = $this->language->get('text_legend_cron');
 
         // Entry
-        $this->template_data['entry_admin_dir']       = $this->language->get('entry_admin_dir');
-        $this->template_data['entry_base_path']       = $this->language->get('entry_base_path');
-        $this->template_data['entry_extensions']      = $this->language->get('entry_extensions');
-        $this->template_data['entry_extensions_help'] = $this->language->get('entry_extensions_help');
-        $this->template_data['entry_include']         = $this->language->get('entry_include');
-        $this->template_data['entry_exclude']         = $this->language->get('entry_exclude');
+        $this->template_data['entry_admin_dir']       		= $this->language->get('entry_admin_dir');
+        $this->template_data['entry_base_path']       		= $this->language->get('entry_base_path');
+        $this->template_data['entry_extensions']      		= $this->language->get('entry_extensions');
+        $this->template_data['entry_extensions_help'] 		= $this->language->get('entry_extensions_help');
+        $this->template_data['entry_include']         		= $this->language->get('entry_include');
+        $this->template_data['entry_include_help']    		= $this->language->get('entry_include_help');
+        $this->template_data['entry_include_help_block']   	= sprintf($this->language->get('entry_include_help_block'), realpath(DIR_APPLICATION . '../../') . DIRECTORY_SEPARATOR . 'other_site.com' . DIRECTORY_SEPARATOR);
+        $this->template_data['entry_exclude']         		= $this->language->get('entry_exclude');
+        $this->template_data['entry_exclude_help']    		= $this->language->get('entry_exclude_help');
+        $this->template_data['entry_exclude_help_block']    = $this->language->get('entry_exclude_help_block');
 
         $this->template_data['entry_cron_access_key']  = $this->language->get('entry_cron_access_key');
         $this->template_data['entry_cron_wget']        = $this->language->get('entry_cron_wget');
@@ -520,6 +528,56 @@ class ControllerSecurityFsMonitor extends CompatibleController
 
     }
 
+    public function widget() {
+        
+        $data['token'] = $this->session->data['token'];
+        
+        $this->template_data['heading_title'] = $this->language->get('text_fs_monitor');
+
+        $this->template_data['text_view_all'] = $this->language->get('text_view_all');
+
+        $this->template_data['text_label_scanned'] = $this->language->get('text_label_scanned');
+        $this->template_data['text_label_new'] = $this->language->get('text_label_new');
+        $this->template_data['text_label_changed'] = $this->language->get('text_label_changed');
+        $this->template_data['text_label_deleted'] = $this->language->get('text_label_deleted');
+        
+        $this->template_data['text_dashboard_scan'] = $this->language->get('text_dashboard_scan');
+
+        $this->template_data['button_view'] = $this->language->get('button_view');
+        $this->template_data['button_scan'] = $this->language->get('button_scan');
+        $this->template_data['button_scan_loading'] = $this->language->get('button_scan_loading');
+
+        $this->template_data['reload_widget'] = html_entity_decode($this->url->link('security/fs_monitor/reloadWidget', 'token=' . $this->session->data['token'], 'SSL'), ENT_QUOTES, 'UTF-8');
+        $this->template_data['view_all'] = $this->url->link('security/fs_monitor', 'token=' . $this->session->data['token'], 'SSL');
+
+        $scan = $this->model_security_fs_monitor->getLastScan();
+
+        if ($scan) {
+            $date_key = $this->language->get('text_scans_on') . date_format(date_create($scan['date_added']), $this->language->get('text_date_format_short'));
+
+            $scan['scan_size_abs_humanized'] = $this->humanizer->humanBytes($scan['scan_size_abs']);
+            $scan['scan_size_rel_humanized'] = $this->humanizer->humanBytes($scan['scan_size_rel']);
+
+            $this->template_data['scan']                   = $scan;
+            $this->template_data['scan']['date_added_ago'] = $this->humanizer->humanDatePrecise($this->template_data['scan']['date_added'], 'H:i:s');
+            $this->template_data['scan']['href']           = $this->url->link('security/fs_monitor/view', 'scan_id=' . $this->template_data['scan']['scan_id'] . '&token=' . $this->session->data['token'], 'SSL');
+            $this->template_data['scan']['date_key']       = $date_key;
+
+            return $this->compatibleRender('security/fs_monitor_widget', $this->template_data, array(), true);
+        }else{
+            return;
+        }
+    }
+
+    public function reloadWidget(){
+        if ($this->validateScan()) {
+        
+            $scan_id = $this->addScan($this->language->get('text_dashboard_scan'));
+            $this->response->setOutput($this->widget());
+        
+        }
+    }
+
     public function generate()
     {
         if ($this->user->hasPermission('modify', 'security/fs_monitor')) {
@@ -597,6 +655,9 @@ class ControllerSecurityFsMonitor extends CompatibleController
                 case 'phtm':
                 case 'phtml':
                     $this->template_data['mode'] = 'php';
+                    break;
+                case 'twig':
+                    $this->template_data['mode'] = 'twig';
                     break;
                 case 'css':
                     $this->template_data['mode'] = 'css';

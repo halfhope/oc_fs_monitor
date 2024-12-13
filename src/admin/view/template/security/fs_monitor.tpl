@@ -76,8 +76,8 @@
             <?php endforeach ?>
           </div>
         </form>
+	<div class="pagination"><?php echo $pagination ?></div>
       </div>
-      <div class="pagination"><?php echo $pagination ?></div>
     </div>
   </div>
 </div>

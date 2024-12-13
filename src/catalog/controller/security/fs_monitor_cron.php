@@ -32,6 +32,9 @@ class ControllerSecurityFsMonitorCron extends CompatibleController
             $this->directory_scanner->setExcludePaths($exclude_paths);
         }
 
+        // add default replace path
+        $this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
+        
         // add extensions
         $extensions = $this->config->get('security_fs_extensions');
         if (!empty($extensions)) {

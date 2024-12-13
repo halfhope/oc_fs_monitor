@@ -58,15 +58,17 @@
               </td>
             </tr>
             <tr>
-              <td><?php echo $entry_include; ?>:</td>
+              <td><?php echo $entry_include; ?>:<br><span class="help"><?php echo $entry_include_help; ?></span></td>
               <td>
                 <textarea name="security_fs_include" id="input-include" class="form-control" cols="30" rows="10"><?php echo $security_fs_include; ?></textarea>
+		<div class="help-block"><?php echo $entry_include_help_block; ?></div>
               </td>
             </tr>
             <tr>
-              <td><?php echo $entry_exclude; ?>:</td>
+              <td><?php echo $entry_exclude; ?>:<br><span class="help"><?php echo $entry_exclude_help; ?></td>
               <td>
                 <textarea name="security_fs_exclude" id="input-exclude" class="form-control" cols="30" rows="10"><?php echo $security_fs_exclude; ?></textarea>
+		<div class="help-block"><?php echo $entry_exclude_help_block; ?></div>
               </td>
             </tr>
           </table>
