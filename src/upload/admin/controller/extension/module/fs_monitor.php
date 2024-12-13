@@ -7,7 +7,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 
 	private	$_route 			= 'extension/module/fs_monitor';
 	private	$_model 			= 'model_extension_module_fs_monitor';
-	private	$_version 			= '1.2.2';
+	private	$_version 			= '1.2.3';
 	private	$_dashboard_route	= 'extension/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 
@@ -390,10 +390,46 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 			$data['security_fs_cron_notify'] = $this->config->get('security_fs_cron_notify');
 		}
 
-		if (isset($this->request->post['security_fs_emails'])) {
-			$data['security_fs_emails'] = $this->request->post['security_fs_emails'];
+		if (isset($this->request->post['security_fs_notify_to'])) {
+			$data['security_fs_notify_to'] = $this->request->post['security_fs_notify_to'];
 		} else {
-			$data['security_fs_emails'] = $this->config->get('security_fs_emails');
+			$data['security_fs_notify_to'] = $this->config->get('security_fs_notify_to');
+		}
+
+		if (isset($this->request->post['security_fs_e_emails'])) {
+			$data['security_fs_e_emails'] = $this->request->post['security_fs_e_emails'];
+		} else {
+			$data['security_fs_e_emails'] = $this->config->get('security_fs_e_emails');
+		}
+
+		if (isset($this->request->post['security_fs_w_phone_number'])) {
+			$data['security_fs_w_phone_number'] = $this->request->post['security_fs_w_phone_number'];
+		} else {
+			$data['security_fs_w_phone_number'] = $this->config->get('security_fs_w_phone_number');
+		}
+
+		if (isset($this->request->post['security_fs_w_business_account_id'])) {
+			$data['security_fs_w_business_account_id'] = $this->request->post['security_fs_w_business_account_id'];
+		} else {
+			$data['security_fs_w_business_account_id'] = $this->config->get('security_fs_w_business_account_id');
+		}
+
+		if (isset($this->request->post['security_fs_w_api_token'])) {
+			$data['security_fs_w_api_token'] = $this->request->post['security_fs_w_api_token'];
+		} else {
+			$data['security_fs_w_api_token'] = $this->config->get('security_fs_w_api_token');
+		}
+
+		if (isset($this->request->post['security_fs_t_api_token'])) {
+			$data['security_fs_t_api_token'] = $this->request->post['security_fs_t_api_token'];
+		} else {
+			$data['security_fs_t_api_token'] = $this->config->get('security_fs_t_api_token');
+		}
+
+		if (isset($this->request->post['security_fs_t_channel_id'])) {
+			$data['security_fs_t_channel_id'] = $this->request->post['security_fs_t_channel_id'];
+		} else {
+			$data['security_fs_t_channel_id'] = $this->config->get('security_fs_t_channel_id');
 		}
 
 		$data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
