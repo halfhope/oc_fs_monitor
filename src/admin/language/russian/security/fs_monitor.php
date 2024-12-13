@@ -12,6 +12,7 @@ $_['text_fs_monitor']            = 'Мониторинг файловой сис
 $_['text_modules']               = 'Модули';
 $_['text_settings']              = 'Настройки';
 $_['text_modal_title']           = 'Новое сканирование';
+$_['text_modal_rename_title']    = 'Переименование сканирования';
 $_['text_scan_name_placeholder'] = 'Например, обновление версии магазина';
 $_['text_scans_on']              = 'Сканирования на ';
 $_['text_label_scanned']         = 'Просканировано';
@@ -22,6 +23,7 @@ $_['text_view']                  = 'Просмотр сканирования';
 $_['text_initial_scan']          = 'Первичное';
 $_['text_date_format_short']     = 'd.m.Y';
 
+$_['text_legend_module']  = 'Модуль';
 $_['text_legend_scanner'] = 'Сканер';
 $_['text_legend_cron']    = 'Cron (автосканирование)';
 
@@ -36,6 +38,7 @@ $_['text_column_crc']    = 'CRC';
 
 // Entry
 $_['entry_scan_name']        = 'Название сканирования';
+$_['entry_admin_dir']        = 'Директория административного раздела';
 $_['entry_base_path']        = 'Базовый путь';
 $_['entry_extensions']       = 'Расширения файлов';
 $_['entry_extensions_help']  = 'Каждое расширение на новой строке.';
@@ -81,17 +84,20 @@ $_['text_interval_today_at']               = 'сегодня в';
 $_['text_interval_tomorrow_at']            = 'завтра в';
 
 // Buttons
-$_['button_scan']         = 'Сканировать';
-$_['button_settings']     = 'Настройки';
-$_['button_scan_loading'] = 'Сканирование...';
-$_['button_save']         = 'Сохранить';
-$_['button_delete']       = 'Удалить';
-$_['button_cancel']       = 'Отмена';
-$_['button_view']         = 'Просмотр';
-$_['button_generate']     = 'Генерировать настройки по умолчанию';
+$_['button_scan']           = 'Сканировать';
+$_['button_rename']         = 'Переименовать';
+$_['button_settings']       = 'Настройки';
+$_['button_scan_loading']   = 'Сканирование...';
+$_['button_rename_loading'] = 'Переименование...';
+$_['button_save']           = 'Сохранить';
+$_['button_delete']         = 'Удалить';
+$_['button_cancel']         = 'Отмена';
+$_['button_view']           = 'Просмотр';
+$_['button_generate']       = 'Генерировать настройки по умолчанию';
 
 //Success
 $_['text_success_scan_created']  = 'Сканирование создано!';
+$_['text_success_renamed']       = 'Сканирование переименовано!';
 $_['text_success_scan_initial']  = 'Первичное сканирование создано автоматически!';
 $_['text_success_scans_deleted'] = 'Выбранные элементы были удачно удалены!';
 $_['text_success_saved']         = 'Настройки удачно сохранены!';

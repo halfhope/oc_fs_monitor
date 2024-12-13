@@ -12,6 +12,7 @@ $_['text_fs_monitor']            = 'File system monitoring';
 $_['text_modules']               = 'Modules';
 $_['text_settings']              = 'Settings';
 $_['text_modal_title']           = 'New scan';
+$_['text_modal_rename_title']    = 'Rename scan';
 $_['text_scan_name_placeholder'] = 'More module works';
 $_['text_scans_on']              = 'Scans on ';
 $_['text_label_scanned']         = 'Scanned';
@@ -22,6 +23,7 @@ $_['text_view']                  = 'View scan';
 $_['text_initial_scan']          = 'Initial';
 $_['text_date_format_short']     = 'F j';
 
+$_['text_legend_module']  = 'Module';
 $_['text_legend_scanner'] = 'Scanner';
 $_['text_legend_cron']    = 'Cron';
 
@@ -36,6 +38,7 @@ $_['text_column_crc']    = 'CRC';
 
 // Entry
 $_['entry_scan_name']        = 'Scan name';
+$_['entry_admin_dir']        = 'Admin dir';
 $_['entry_base_path']        = 'Base path';
 $_['entry_extensions']       = 'Extenstions';
 $_['entry_extensions_help']  = 'Each extension on a new line';
@@ -81,17 +84,20 @@ $_['text_interval_today_at']               = 'today at';
 $_['text_interval_tomorrow_at']            = 'tomorrow at';
 
 // Buttons
-$_['button_scan']         = 'Scan';
-$_['button_settings']     = 'Settings';
-$_['button_scan_loading'] = 'Scanning...';
-$_['button_save']         = 'Save';
-$_['button_delete']       = 'Delete';
-$_['button_cancel']       = 'Cancel';
-$_['button_view']         = 'View';
-$_['button_generate']     = 'Generate default settings';
+$_['button_scan']           = 'Scan';
+$_['button_rename']         = 'Rename';
+$_['button_settings']       = 'Settings';
+$_['button_scan_loading']   = 'Scanning...';
+$_['button_rename_loading'] = 'Renaming...';
+$_['button_save']           = 'Save';
+$_['button_delete']         = 'Delete';
+$_['button_cancel']         = 'Cancel';
+$_['button_view']           = 'View';
+$_['button_generate']       = 'Generate default settings';
 
 //Success
 $_['text_success_scan_created']  = 'Success: Scan created!';
+$_['text_success_renamed']       = 'Success: Scan renamed!';
 $_['text_success_scan_initial']  = 'Success: Initial scan was been created automatically!';
 $_['text_success_scans_deleted'] = 'Success: Scans deleted!';
 $_['text_success_saved']         = 'Success: Settings saved!';

@@ -24,7 +24,20 @@
     <div class="content">
       <form action="<?php echo $action_save; ?>" method="post" enctype="multipart/form-data" id="form">
         <div id="tab-general">
+
+          <h2><?php echo $text_legend_module ?></h2>
+
+          <table class="form">
+            <tr>
+              <td><span class="required">*</span> <?php echo $entry_admin_dir; ?>:</td>
+              <td>
+                <input type="text" name="security_fs_admin_dir" value="<?php echo $security_fs_admin_dir; ?>" placeholder="<?php echo $entry_admin_dir; ?>" id="input-admin-dir" class="form-control" />
+              </td>
+            </tr>
+          </table>
+
           <h2><?php echo $text_legend_scanner ?></h2>
+
           <table class="form">
             <tr>
               <td><span class="required">*</span> <?php echo $entry_base_path; ?>:</td>
@@ -57,7 +70,9 @@
               </td>
             </tr>
           </table>
+
           <h2><?php echo $text_legend_cron ?></h2>
+
           <table class="form">
             <tr>
               <td><span class="required">*</span> <?php echo $entry_cron_access_key; ?>:</td>
@@ -133,6 +148,7 @@
               </td>
             </tr>
           </table>
+
         </form>
       </div>
     </div>
