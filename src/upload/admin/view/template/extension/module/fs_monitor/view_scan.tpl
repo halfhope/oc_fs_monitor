@@ -7,7 +7,7 @@
 	table.table-security *{font-family:Consolas;font-size:9pt}
 	table.table-security{border:1px solid #ccf;width:100%;border-collapse:collapse;border:1px solid #8892BF}
 	table.table-security > thead > tr{background:#ccf}
-	table.table-security > thead > tr > th{background:#8892BF;padding:3px 5px;color:#fff;text-align:left;border-bottom:1px solid #8892BF}
+	table.table-security > thead > tr > th{background:#8892BF;padding:3px 5px;color:#fff;text-align:left;border-bottom:1px solid #8892BF;border-radius:0!important;text-transform:none;}
 	table.table-security > thead > tr > th + th{border-left:1px solid #99c}
 	table.table-security > tbody > tr > td{padding:3px}
 	table.table-security > tbody > tr > td:first-child{overflow:hidden;white-space:nowrap;}
@@ -16,7 +16,7 @@
 	.changes-list{line-height:38px}
 	.security-scan{margin:0;border:1px solid #e5e5e5;padding:8px 10px;margin-bottom:15px}
 	.security-scan .scan-name a{color:#4e575b;font-size:15px;font-weight:700;text-decoration:none}
-	.changed{background:#4F5B93;color:#fff}
+	table.table-security > tbody > tr > td.changed{background:#4F5B93;color:#fff}
 	#security-scan-view .table_caption{margin:1em 0;font-weight:700;color:#444;font-size:14px}
 	.accordeon_toggle,.btn-copy{cursor:pointer}
 	table.table-security.table-hidden{display:none}
@@ -55,7 +55,7 @@
 		<?php } ?>
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3>
+				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3><h3 class="panel-title pull-right">v<?php echo $version ?></h3>
 			</div>
 			<div class="panel-body">
 				<div id="security-scan-view">
@@ -119,7 +119,7 @@
 								<i class="fa fa-copy"></i>
 							</span>
 						</div>
-						<table class="table table-security table-new<?php echo ($scan['new_count'] > 100) ? ' table-hidden' : '' ?>">
+						<table class="table table-security table-new<?php echo ($scan['new_count'] > 100) ? ' table-hidden' : '' ?> sortable">
 							<thead>
 								<tr>
 									<th class="column_name"><?php echo $text_column_name ?></th>
@@ -136,9 +136,9 @@
 								<tr>
 									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
 									<td><?php echo $file_data['extension'] ?></td>
-									<td class="column_size"><?php echo $file_data['filesize']; ?></td>
-									<td><?php echo $file_data['filemtime'] ?></td>
-									<td><?php echo $file_data['filectime'] ?></td>
+									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="column_size"><?php echo $file_data['filesize']; ?></td>
+									<td data-sort="<?php echo $file_data['int_filemtime'] ?>"><?php echo $file_data['filemtime'] ?></td>
+									<td data-sort="<?php echo $file_data['int_filectime'] ?>"><?php echo $file_data['filectime'] ?></td>
 									<td><?php echo $file_data['fileperms'] ?></td>
 									<td><?php echo $file_data['crc']; ?></td>
 								</tr>
@@ -158,7 +158,7 @@
 								<i class="fa fa-copy"></i>
 							</span>
 						</div>
-						<table class="table table-security table-changed<?php echo ($scan['changed_count'] > 100) ? ' table-hidden' : '' ?>">
+						<table class="table table-security table-changed<?php echo ($scan['changed_count'] > 100) ? ' table-hidden' : '' ?> sortable">
 							<thead>
 								<tr>
 									<th class="column_name"><?php echo $text_column_name ?></th>
@@ -175,9 +175,9 @@
 								<tr>
 									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
 									<td><?php echo $file_data['extension'] ?></td>
-									<td class="<?php echo isset($file_data['diff']['filesize']) ? 'changed column_size' : 'column_size'; ?>"><?php echo $file_data['filesize']; ?></td>
-									<td class="<?php echo isset($file_data['diff']['filemtime']) ? 'changed' : ''; ?>"><?php echo $file_data['filemtime']; ?></td>
-									<td class="<?php echo isset($file_data['diff']['filectime']) ? 'changed' : ''; ?>"><?php echo $file_data['filectime']; ?></td>
+									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="<?php echo isset($file_data['diff']['filesize']) ? 'changed column_size' : 'column_size'; ?>"><?php echo $file_data['filesize']; ?></td>
+									<td data-sort="<?php echo $file_data['int_filemtime'] ?>" class="<?php echo isset($file_data['diff']['filemtime']) ? 'changed' : ''; ?>"><?php echo $file_data['filemtime']; ?></td>
+									<td data-sort="<?php echo $file_data['int_filectime'] ?>" class="<?php echo isset($file_data['diff']['filectime']) ? 'changed' : ''; ?>"><?php echo $file_data['filectime']; ?></td>
 									<td class="<?php echo isset($file_data['diff']['fileperms']) ? 'changed' : ''; ?>"><?php echo $file_data['fileperms']; ?></td>
 									<td class="<?php echo isset($file_data['diff']['crc']) ? 'changed' : ''; ?>"><?php echo $file_data['crc']; ?></td>
 								</tr>
@@ -196,7 +196,7 @@
 								<i class="fa fa-copy"></i>
 							</span>
 						</div>
-						<table class="table table-security table-deleted<?php echo ($scan['deleted_count'] > 100) ? ' table-hidden' : '' ?>">
+						<table class="table table-security table-deleted<?php echo ($scan['deleted_count'] > 100) ? ' table-hidden' : '' ?> sortable">
 							<thead>
 								<tr>
 									<th class="column_name"><?php echo $text_column_name ?></th>
@@ -213,9 +213,9 @@
 								<tr>
 									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
 									<td><?php echo $file_data['extension'] ?></td>
-									<td class="column_size"><?php echo $file_data['filesize']; ?></td>
-									<td><?php echo $file_data['filemtime'] ?></td>
-									<td><?php echo $file_data['filectime'] ?></td>
+									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="column_size"><?php echo $file_data['filesize']; ?></td>
+									<td data-sort="<?php echo $file_data['int_filemtime'] ?>"><?php echo $file_data['filemtime'] ?></td>
+									<td data-sort="<?php echo $file_data['int_filectime'] ?>"><?php echo $file_data['filectime'] ?></td>
 									<td><?php echo $file_data['fileperms'] ?></td>
 									<td><?php echo $file_data['crc']; ?></td>
 								</tr>
@@ -306,7 +306,7 @@ var showScanned = function() {
 	if ($scanned_wrapper.html() == '') {
 		$scanned_wrapper.html('<center><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></center>');
 		html = '';
-		html += '<table class="table table-security table-scanned table-hidden">';
+		html += '<table class="table table-security table-scanned table-hidden sortable">';
 			html += '<thead>';
 				html += '<tr>';
 					html += '<th class="column_name"><?php echo $text_column_name ?></th>';
@@ -323,9 +323,9 @@ var showScanned = function() {
 				html += '<tr>';
 					html += '<td><a href="<?php echo $action_file ?>&file_name=' + index + '" target="_blank">' + val['relpath'] + '</a></td>';
 					html += '<td>' + val['extension'] + '</td>';
-					html += '<td class="column_size">' + val['filesize'] + '</td>';
-					html += '<td>' + val['filemtime'] + '</td>';
-					html += '<td>' + val['filectime'] + '</td>';
+					html += '<td data-sort="' + val['int_filesize'] + '" class="column_size">' + val['filesize'] + '</td>';
+					html += '<td data-sort="' + val['int_filemtime'] + '">' + val['filemtime'] + '</td>';
+					html += '<td data-sort="' + val['int_filectime'] + '">' + val['filectime'] + '</td>';
 					html += '<td>' + val['fileperms'] + '</td>';
 					html += '<td>' + val['crc'] + '</td>';
 				html += '</tr>';

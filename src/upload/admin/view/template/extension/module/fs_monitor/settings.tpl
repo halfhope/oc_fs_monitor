@@ -30,7 +30,7 @@
 		<?php } ?>
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3>
+				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3><h3 class="panel-title pull-right">v<?php echo $version ?></h3>
 			</div>
 			<div class="panel-body">
 				<form action="<?php echo $action_save; ?>" method="post" enctype="multipart/form-data" id="form-settings" class="form-horizontal">
@@ -185,13 +185,13 @@ $(document).ready(function($) {
 	$('#input-cron-access-key').on('change keyup paste', function(event) {
 		event.preventDefault();
 		var output_field = $('#input-cron-wget');
-		$(output_field).val($(output_field).data('default') + $(this).val());
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
 
 		var output_field = $('#input-cron-curl');
-		$(output_field).val($(output_field).data('default') + $(this).val());
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
 
 		var output_field = $('#input-cron-cli');
-		$(output_field).val($(output_field).data('default') + $(this).val());
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
 
 	}).trigger('change');
 });

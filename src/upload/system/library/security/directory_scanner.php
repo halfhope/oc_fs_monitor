@@ -2,6 +2,7 @@
 /**
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
+
 namespace Security;
 class Directory_scanner {
 
@@ -56,7 +57,7 @@ class Directory_scanner {
 		set_time_limit(0);
 		ini_set('max_execution_time', 0);
 		
-		$files = array();
+		$files = [];
 
 		foreach ($this->include_paths as $path) {
 			$directory = new \RecursiveDirectoryIterator($path);

@@ -1,28 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <modification>
-  <name>FSMonitor widget</name>
-  <code>fsmonitor_widget</code>
-  <version>1.2</version>
-  <author>halfhope</author>
-  <link>https://shtt.blog/</link>
-  <file path="admin/controller/common/dashboard.php">
-	<operation>
-      <search>
-        <![CDATA[$data['online'] = $this->load->controller('dashboard/online');]]>
-      </search>
-      <add position="after">
-        <![CDATA[$data['fs_monitor'] = $this->load->controller('module/fs_monitor/widget');]]>
-      </add>
-    </operation>
-  </file>
-  <file path="admin/view/template/common/dashboard.tpl">
-	<operation>
-      <search>
-        <![CDATA[<div class="col-lg-3 col-md-3 col-sm-6"><?php echo $online; ?></div>]]>
-      </search>
-      <add position="after">
-        <![CDATA[<div class="col-md-12 col-sm-12"><?php echo $fs_monitor; ?></div>]]>
-      </add>
-    </operation>
-  </file>
+	<name>FSMonitor - filesystem monitoring</name>
+	<version>1.2.1</version>
+	<author>halfhope</author>
+	<code>fs_monitor</code>
+	<link>https://shtt.blog/</link>
 </modification>
