@@ -13,3 +13,7 @@
 * fix: Fixed a critical error when displaying the widget before module installation
 * fix: Fixed paths in cron commands for scan execution
 
+#### 1.2.2
+
+* feature: Added emails list for notifications
+
