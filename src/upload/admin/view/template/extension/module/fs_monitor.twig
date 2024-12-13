@@ -1,0 +1,162 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="#" data-toggle="tooltip" title="{{ button_scan }}" id="button-scan" class="btn btn-success"><i class="fa fa-plus"></i></a>
+        <a href="#" data-toggle="tooltip" title="{{ button_delete }}" id="button-delete" class="btn btn-danger" disabled="disabled"><i class="fa fa-trash-o"></i></a>
+        <a href="{{ action_settings }}" data-toggle="tooltip" title="{{ button_settings }}" id="button-settings" class="btn btn-primary"><i class="fa fa-cog"></i></a>
+        <!-- <a href="{{ action_cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a> -->
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ panel_title }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="security-scans-container">
+          <form action="{{ action_delete }}" method="post" enctype="multipart/form-data" id="form-scans-list">
+            <div class="security-scan-list">
+              {% for key, date_scans in scans %}
+              <div class="day">
+                <svg aria-hidden="true" class="octicon" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
+                <span>{{ key }}</span>
+              </div>
+              {% for scan in date_scans %}
+              <div class="security-scan row">
+
+                <div class="scan-heading pull-left col-sm-4 col-xs-12">
+                  <div class="scan-list-checkbox">
+                    <input type="checkbox" name="scans[{{ scan.scan_id }}]" value="{{ scan.scan_id }}">
+                  </div>
+                  <div class="scan-name"><a href="{{ scan.href }}">{{ scan.name }}</a></div>
+                  <div class="scan-date-added"><b>{{ scan.user_name }}</b>, {{ scan.date_added_ago }}</div>
+                </div>
+
+                <div class="changes-list col-sm-3 col-xs-6">
+                  {% if scan.scanned_count %}
+                  <a href="{{ scan.href }}#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="{{ text_label_scanned }}">  <div class="fa fa-file-o"></div> {{ scan.scanned_count }}</span></a>
+                  {% endif %}
+
+                  {% if scan.new_count %}
+                  <a href="{{ scan.href }}#new"><span class="files-added label label-success" data-toggle="tooltip" title="{{ text_label_new }}">    <div class="fa fa-plus"></div> {{ scan.new_count }}</span></a>
+                  {% endif %}
+
+                  {% if scan.changed_count %}
+                  <a href="{{ scan.href }}#changed"><span class="files-changed label label-warning" data-toggle="tooltip" title="{{ text_label_changed }}">  <div class="fa fa-ellipsis-h"></div> {{ scan.changed_count }}</span></a>
+                  {% endif %}
+
+                  {% if scan.deleted_count %}
+                  <a href="{{ scan.href }}#deleted"><span class="files-deleted label label-danger" data-toggle="tooltip" title="{{ text_label_deleted }}">  <div class="fa fa-minus"></div> {{ scan.deleted_count }}</span></a>
+                  {% endif %}
+                </div>
+
+                <div class="changes-list col-sm-3 col-xs-3">
+                  {% if scan.scan_size_rel == 0 %}
+                    <span class="label label-info" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">{{ scan.scan_size_rel_humanized }}</span>
+                  {% else %}
+                    {% if scan.scan_size_rel > 0 %}
+                    <span class="files-added label label-success" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">    <div class="fa fa-plus"></div> {{ scan.scan_size_rel_humanized }}</span>
+                    {% else %}
+                    <span class="files-added label label-danger" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">    <div class="fa fa-minus"></div> {{ scan.scan_size_rel_humanized }}</span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+
+                <div class="changes-list col-sm-2 col-xs-3">
+                  <div class="pull-right">
+                    <a href="{{ scan.href }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-default"><i class="fa fa-eye"></i></a>
+                  </div>
+                </div>
+
+              </div>
+        {% endfor %}
+        {% endfor %}
+
+            </div>
+          </form>
+        </div>
+        <div class="pagination">{{ pagination }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addScan" tabindex="0" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ text_modal_title }}</h4>
+      </div>
+      <div class="modal-body">
+        <form action="{{ action_scan }}" method="post" enctype="multipart/form-data" id="form-scan">
+          <div class="form-group required">
+            <label for="scan_name" class="control-label">{{ entry_scan_name }}</label>
+            <input type="text" class="form-control" name="scan_name" id="scan_name" placeholder="{{ text_scan_name_placeholder }}" autocomplete="off">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="submit" id="scanNow" data-loading-text="{{ button_scan_loading }}" class="btn btn-success">{{ button_scan }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>svg.octicon{fill:currentColor;vertical-align:text-bottom;color:#ccc;background:#fff;z-index:2;position:relative}.security-scans-container{position:relative}.security-scan-list{padding-left:25px}.security-scan-list:before{position:absolute;top:0;bottom:0;left:6px;z-index:1;display:block;width:2px;content:"";background-color:#f3f3f3}.security-scan-list .day{margin-left:-25px;font-size:14px;color:#767676;padding-bottom:10px}.security-scan-list .scan-list-checkbox{width:30px;padding-left:5px;line-height:38px;display:inline-block;float:left}.security-scan-list .security-scan + .day{padding-top:10px}.security-scan-list .day span{margin-left:7px}.security-scan{margin:0;border:1px solid #e5e5e5;padding:8px 10px}.security-scan:hover{background:#f7fbfc}.security-scan.row .scan-heading{padding-left:0}.security-scan + .security-scan{border-top:none}.security-scan .scan-name{font-size:15px;font-weight:700}.security-scan .scan-name a{color:#4e575b}.security-scan .scan-date-added{color:#767676}.security-scan .changes-list{color:#767676;line-height:38px}.security-scan span.label{font-size:10pt}</style>
+<script>
+  $('#button-scan').click(function(event) {
+    event.preventDefault();
+    $('#addScan').modal();
+  });
+
+  $('#scanNow').click(function(event){
+    event.preventDefault();
+    $('#form-scan').submit();
+  });
+
+  $('#addScan').on('shown.bs.modal', function (event) {
+    $('#scan_name').focus();
+  });
+
+  $('form#form-scan').on('submit', function(event){
+    $('#scanNow').button('loading');
+  });
+
+  $('input[type="checkbox"][name^="scans"]').click(function(event) {
+    var checked = $('input[type="checkbox"][name^="scans"]:checked').length;
+    if (checked >= 1) {
+      $('#button-delete').attr('disabled', false);
+    }else{
+      $('#button-delete').attr('disabled', true);
+    }
+  });
+
+  $('#button-delete').on('click', function(event) {
+    event.preventDefault();
+    var checked = $('input[type="checkbox"][name^="scans"]:checked').length;
+    if (checked >= 1) {
+      $('#form-scans-list').submit();
+    }
+  });
+</script>
+{{ footer }}
