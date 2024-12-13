@@ -145,11 +145,17 @@
 									<?php echo $text_no; ?>
 									<?php } ?>
 								</label>
-							</div>
+							</td>
 						</div>
+					</fieldset>
+		
+					<fieldset>
+
+						<legend><?php echo $text_legend_notify ?></legend>
 
 						<div class="form-group">
-							<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="<?php echo $entry_cron_notify_help; ?>"><?php echo $entry_cron_notify; ?></span></label>
+							
+							<label for="" class="col-sm-2 control-label"><span data-toggle="tooltip" title="<?php echo $entry_cron_notify_help; ?>"><?php echo $entry_cron_notify; ?></span></label>
 							<div class="col-sm-10">
 								<label class="radio-inline">
 									<?php if ($security_fs_cron_notify) { ?>
@@ -170,17 +176,84 @@
 									<?php } ?>
 								</label>
 							</div>
+						
 						</div>
-
+						
 						<div class="form-group">
-							<label for="input-emails" class="col-sm-2 control-label"><?php echo $entry_emails; ?><span data-toggle="tooltip" title="<?php echo $entry_emails_help; ?>"></span></label>
+							<label for="" class="col-sm-2 control-label"><?php echo $entry_notify_to; ?></label>
 							<div class="col-sm-10">
-								<input type="text" name="security_fs_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_emails; ?>"></textarea>
+								<select name="security_fs_notify_to" id="#input-notify-to" class="form-control">
+									<option value="email" <?php echo $security_fs_notify_to == 'email' ? 'selected' : '' ?>><?php echo $tab_email ?></option>
+									<option value="whatsapp" <?php echo $security_fs_notify_to == 'whatsapp' ? 'selected' : '' ?>><?php echo $tab_whatsapp ?></option>
+									<option value="telegram" <?php echo $security_fs_notify_to == 'telegram' ? 'selected' : '' ?>><?php echo $tab_telegramm ?></option>
+								</select>
 							</div>
+						</div>	
+						
+						<ul class="nav nav-tabs">
+							<li class="active"><a data-toggle="tab" href="#tab-email" class="active"><?php echo $tab_email; ?></a></li>
+							<li><a data-toggle="tab" href="#tab-whatsapp"><?php echo $tab_whatsapp; ?></a></li>
+							<li><a data-toggle="tab" href="#tab-telegram"><?php echo $tab_telegramm; ?></a></li>
+						</ul>
+
+						<div class="tab-content">
+
+							<div class="tab-pane active" id="tab-email">
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="<?php echo $entry_e_emails_help; ?>"><?php echo $entry_e_emails; ?></span></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_e_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_e_emails; ?>">
+									</div>
+								</div>
+							
+							</div>
+							
+							<div class="tab-pane" id="tab-whatsapp">
+								
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><?php echo $entry_w_phone_number; ?></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_phone_number" id="input-emails" class="form-control" value="<?php echo $security_fs_w_phone_number; ?>">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><?php echo $entry_w_business_account_id; ?></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_business_account_id" id="input-emails" class="form-control" value="<?php echo $security_fs_w_business_account_id; ?>">
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><?php echo $entry_w_api_token; ?></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_w_api_token" id="input-emails" class="form-control" value="<?php echo $security_fs_w_api_token; ?>">
+									</div>
+								</div>
+								<div class="help-block"><?php echo $text_whatsapp_help; ?></div>
+							</div>
+
+							<div class="tab-pane" id="tab-telegram">
+
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><?php echo $entry_t_api_token; ?></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_t_api_token" id="input-emails" class="form-control" value="<?php echo $security_fs_t_api_token; ?>">
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label"><?php echo $entry_t_channel_id; ?></label>
+									<div class="col-sm-10">
+										<input type="text" name="security_fs_t_channel_id" id="input-emails" class="form-control" value="<?php echo $security_fs_t_channel_id; ?>">
+									</div>
+								</div>
+
+								<div class="help-block"><?php echo $text_telegram_help; ?></div>
+							</div>
+
 						</div>
 
 					</fieldset>
-
 				</form>
 			</div>
 		</div>
@@ -188,7 +261,7 @@
 </div>
 <script>
 $(document).ready(function($) {
-
+	
 	$('#input-cron-access-key').on('change keyup paste', function(event) {
 		event.preventDefault();
 		var output_field = $('#input-cron-wget');
