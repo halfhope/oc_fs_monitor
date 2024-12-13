@@ -7,7 +7,7 @@ namespace Opencart\Admin\Controller\Extension\FSMonitor\Dashboard;
 class FSMonitor extends \Opencart\System\Engine\Controller {
 
 	private	$_route 			= 'extension/fs_monitor/module/fs_monitor';
-	public 	$_version 			= '1.2.3';
+	public 	$_version 			= '1.2.3.1';
 	private	$_dashboard_route 	= 'extension/fs_monitor/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 
