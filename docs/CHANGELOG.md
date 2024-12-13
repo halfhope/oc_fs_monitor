@@ -46,3 +46,7 @@
 * fix: Corrected the rendering of the scan list page
 * fix: Fixed a bug where settings would reset
 
+#### 1.2.3.1
+
+* fix: Replaced deprecated function strftime
+
