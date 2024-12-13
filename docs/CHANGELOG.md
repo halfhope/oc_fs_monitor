@@ -34,3 +34,8 @@
 * feature: Added German language support
 * refactor: Complete code refactoring
 
+#### 1.2
+
+* fix: Minor bug fixes
+* style: Code formatting
+
