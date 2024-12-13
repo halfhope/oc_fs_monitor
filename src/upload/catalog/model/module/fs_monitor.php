@@ -3,9 +3,7 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-class ModelExtensionModuleFSMonitor extends Model {
-	
-	public $_version = '1.2';
+class ModelModuleFSMonitor extends Model {
 
 	private function pack_data($object) {
 		return base64_encode(gzdeflate(json_encode($object)));
@@ -39,7 +37,7 @@ class ModelExtensionModuleFSMonitor extends Model {
 		if ($last_scan->num_rows == 1) {
 			$last_scan->row['scan_data'] = $this->unpack_data($last_scan->row['scan_data']);
 			$to_update = [$scan, $last_scan->row];
-		}else{
+		} else {
 			$to_update = [$scan];
 		}
 

@@ -28,7 +28,7 @@
 		<?php } ?>
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3>
+				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3><h3 class="panel-title pull-right">v<?php echo $version ?></h3>
 			</div>
 			<div class="panel-body">
 				<div class="security-scans-container">
