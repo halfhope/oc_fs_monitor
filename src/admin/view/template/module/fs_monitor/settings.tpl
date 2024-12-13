@@ -65,7 +65,7 @@
 							</td>
 						</tr>
 						<tr>
-							<td><?php echo $entry_exclude; ?>:<br><span class="help"><?php echo $entry_exclude_help; ?></td>
+							<td><?php echo $entry_exclude; ?>:<br><span class="help"><?php echo $entry_exclude_help; ?></span></td>
 							<td>
 								<textarea name="security_fs_exclude" id="input-exclude" class="form-control" cols="30" rows="10"><?php echo $security_fs_exclude; ?></textarea>
 								<div class="help-block"><?php echo $entry_exclude_help_block; ?></div>
@@ -147,6 +147,12 @@
 									<?php echo $text_no; ?>
 									<?php } ?>
 								</label>
+							</td>
+						</tr>
+						<tr>
+							<td><?php echo $entry_emails; ?>:<br><span class="help"><?php echo $entry_emails_help; ?></span></td>
+							<td>
+								<input type="text" name="security_fs_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_emails; ?>"></textarea>
 							</td>
 						</tr>
 					</table>

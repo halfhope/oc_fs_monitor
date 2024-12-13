@@ -164,12 +164,13 @@ class ModelModuleFSMonitor extends Model {
 			'security_fs_cron_access_key' => md5(mt_rand()),
 			'security_fs_cron_save' => 1,
 			'security_fs_cron_notify' => 1,
+			'security_fs_emails' => '',
 			'security_fs_exclude' => str_replace('|', PHP_EOL, 'vqmod/vqcache/')
 		];
 
 		foreach ($defaults as $key => $value) {
 			$setting = $this->config->get($key);
-			if (empty($setting) || $replace) {
+			if (is_null($setting) || $replace) {
 				$this->editSetting($key, $value, 'security_fs');				
 			}
 		}
