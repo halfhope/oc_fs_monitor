@@ -15,3 +15,11 @@
 * fix: Added tooltips for module settings
 * fix: Added pagination limit check
 
+#### 1.1.2
+
+* feature: Added the ability to exclude files and folders using patterns
+* feature: Added functionality to copy the file list
+* feature: Added support for the OpenCart Cloud Platform
+* feature: Added German language support
+* refactor: Complete code refactoring
+
