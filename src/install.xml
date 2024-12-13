@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <modification>
-    <name>FSMonitor - filesystem monitoring</name>
-    <version>1.2</version>
-    <author>halfhope</author>
-    <link>https://shtt.blog/</link>
+	<name>FSMonitor - filesystem monitoring</name>
+	<version>1.2.1</version>
+	<author>halfhope</author>
+	<link>https://shtt.blog/</link>
 </modification>

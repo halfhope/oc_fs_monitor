@@ -1,0 +1,200 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+<style>.form-group+.form-group{border:none}</style>
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="float-end">
+				<button type="submit" id="saveBtn" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+				<a href="{{ action_generate }}" data-bs-toggle="tooltip" title="{{ button_generate }}" class="btn btn-warning"><i class="fa fa-cogs"></i></a>
+				<a href="{{ action_cancel }}" data-bs-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-light"><i class="fa fa-reply"></i></a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ol class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+					<li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ol>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+			<div class="alert alert-danger alert-dismissible"><i class="fas fa-exclamation-circle"></i> {{ error_warning }}
+				<button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		{% endif %}
+		{% if success %}
+		<div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ success }}
+			<button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+		{% endif %}
+		<div class="card">
+			<div class="card-header"><i class="fas fa-pencil-alt"></i> {{ panel_title }}<span class="float-end">v{{ version }}</span></div>
+			<div class="card-body">
+				<form action="{{ action_save }}" method="post" enctype="multipart/form-data" id="form-settings" class="form-horizontal">
+
+					<fieldset>
+
+						<legend>{{ text_legend_module }}</legend>
+
+						<div class="row mb-3 required">
+							<label class="col-sm-2 col-form-label" for="input-admin-dir">{{ entry_admin_dir }}</label>
+							<div class="col-sm-10">
+								<input type="text" name="security_fs_admin_dir" value="{{ security_fs_admin_dir }}" placeholder="{{ entry_admin_dir }}" id="input-admin-dir" class="form-control" />
+							</div>
+						</div>
+
+					</fieldset>
+
+					<fieldset>
+
+						<legend>{{ text_legend_scanner }}</legend>
+
+						<div class="row mb-3 required">
+							<label class="col-sm-2 col-form-label" for="input-base-path">{{ entry_base_path }}</label>
+							<div class="col-sm-10">
+								<input type="text" name="security_fs_base_path" value="{{ security_fs_base_path }}" placeholder="{{ entry_base_path }}" id="input-base-path" class="form-control" />
+								
+								{% if error_base_path %}
+								<div class="text-danger">{{ error_base_path }}</div>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3 required">
+							<label class="col-sm-2 col-form-label" for="input-extensions"><span data-bs-toggle="tooltip" title="{{ entry_extensions_help }}">{{ entry_extensions }}</span></label>
+							<div class="col-sm-10">
+								<textarea name="security_fs_extensions" id="input-extensions" class="form-control" cols="30" rows="10">{{ security_fs_extensions }}</textarea>
+								{% if error_extensions %}
+								<div class="text-danger">{{ error_extensions }}</div>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label" for="input-include"><span data-bs-toggle="tooltip" title="{{ entry_include_help }}">{{ entry_include }}</span></label>
+							<div class="col-sm-10">
+								<textarea name="security_fs_include" id="input-include" class="form-control" cols="30" rows="10">{{ security_fs_include }}</textarea>
+		<div class="help-block">{{ entry_include_help_block }}</div>
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label" for="input-exclude"><span data-bs-toggle="tooltip" title="{{ entry_exclude_help }}">{{ entry_exclude }}</span></label>
+							<div class="col-sm-10">
+								<textarea name="security_fs_exclude" id="input-exclude" class="form-control" cols="30" rows="10">{{ security_fs_exclude }}</textarea>
+		<div class="help-block">{{ entry_exclude_help_block }}</div>
+							</div>
+						</div>
+					</fieldset>
+
+					<fieldset>
+
+						<legend>{{ text_legend_cron }}</legend>
+
+						<div class="row mb-3 required">
+							<label class="col-sm-2 col-form-label" for="input-cron-access-key">{{ entry_cron_access_key }}</label>
+							<div class="col-sm-10">
+								<input type="text" name="security_fs_cron_access_key" value="{{ security_fs_cron_access_key }}" id="input-cron-access-key" class="form-control" autocomplete="off"/>
+								{% if error_access_key %}
+								<div class="text-danger">{{ error_access_key }}</div>
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label" for="input-cron-wget">{{ entry_cron_wget }}</label>
+							<div class="col-sm-10">
+								<input type="text" data-default="{{ security_fs_cron_wget }}" value="{{ security_fs_cron_wget }}" id="input-cron-wget" class="form-control" readonly="1" />
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label" for="input-cron-curl">{{ entry_cron_curl }}</label>
+							<div class="col-sm-10">
+								<input type="text" data-default="{{ security_fs_cron_curl }}" value="{{ security_fs_cron_curl }}" id="input-cron-curl" class="form-control" readonly="1" />
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label" for="input-cron-cli">{{ entry_cron_cli }}</label>
+							<div class="col-sm-10">
+								<input type="text" data-default="{{ security_fs_cron_cli }}" value="{{ security_fs_cron_cli }}" id="input-cron-cli" class="form-control" readonly="1" />
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_save_help }}">{{ entry_cron_save }}</span></label>
+							<div class="col-sm-10">
+								<label class="radio-inline">
+									{% if security_fs_cron_save %}
+									<input type="radio" name="security_fs_cron_save" value="1" checked="checked" />
+									{{ text_yes }}
+									{% else %}
+									<input type="radio" name="security_fs_cron_save" value="1" />
+									{{ text_yes }}
+									{% endif %}
+								</label>
+								<label class="radio-inline">
+									{% if security_fs_cron_save == false %}
+									<input type="radio" name="security_fs_cron_save" value="0" checked="checked" />
+									{{ text_no }}
+									{% else %}
+									<input type="radio" name="security_fs_cron_save" value="0" />
+									{{ text_no }}
+									{% endif %}
+								</label>
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_notify_help }}">{{ entry_cron_notify }}</span></label>
+							<div class="col-sm-10">
+								<label class="radio-inline">
+									{% if security_fs_cron_notify %}
+									<input type="radio" name="security_fs_cron_notify" value="1" checked="checked" />
+									{{ text_yes }}
+									{% else %}
+									<input type="radio" name="security_fs_cron_notify" value="1" />
+									{{ text_yes }}
+									{% endif %}
+								</label>
+								<label class="radio-inline">
+									{% if security_fs_cron_notify == false %}
+									<input type="radio" name="security_fs_cron_notify" value="0" checked="checked" />
+									{{ text_no }}
+									{% else %}
+									<input type="radio" name="security_fs_cron_notify" value="0" />
+									{{ text_no }}
+									{% endif %}
+								</label>
+							</div>
+						</div>
+
+					</fieldset>
+
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+$(document).ready(function($) {
+	$('#saveBtn').on('click', function(){
+		$('#form-settings').submit();
+	});
+	$('#input-cron-access-key').on('change keyup paste', function(event) {
+		event.preventDefault();
+		var output_field = $('#input-cron-wget');
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
+
+		var output_field = $('#input-cron-curl');
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
+
+		var output_field = $('#input-cron-cli');
+		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
+
+	}).trigger('change');
+});
+</script>
+{{ footer }}
