@@ -80,7 +80,8 @@ $_['entry_include_help_block']		= 'Nur absolute Pfade dürfen vewendet werden<br
 $_['entry_exclude']					= 'Ausgenommen Verzeichnisse und Dateien';
 $_['entry_exclude_help']			= 'Pro Zeile eine Angabe';
 $_['entry_exclude_help_block']		= 'Es können sowohl absolute als auch relative Pfade angegeben werden, auch Wildcards *.<br>Beispiel:<ul><li>/var/www/username/www-data/andere_webseite.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
-
+$_['entry_emails'] 	                = 'E-Mail-Adresse für Benachrichtigungen';
+$_['entry_emails_help'] 	        = 'Geben Sie die Adressen durch Kommas getrennt ein';
 
 // Interval datetime functions
 $_['text_interval_days']					= 'Tage';
