@@ -73,16 +73,18 @@
             </div>
 
             <div class="form-group">
-              <label class="col-sm-2 control-label" for="input-include"><?php echo $entry_include; ?></label>
+              <label class="col-sm-2 control-label" for="input-include"><span data-toggle="tooltip" title="<?php echo $entry_include_help; ?>"><?php echo $entry_include; ?></span></label>
               <div class="col-sm-10">
                 <textarea name="security_fs_include" id="input-include" class="form-control" cols="30" rows="10"><?php echo $security_fs_include; ?></textarea>
+                <div class="help-block"><?php echo $entry_include_help_block; ?></div>
               </div>
             </div>
 
             <div class="form-group">
-              <label class="col-sm-2 control-label" for="input-exclude"><?php echo $entry_exclude; ?></label>
+              <label class="col-sm-2 control-label" for="input-exclude"><span data-toggle="tooltip" title="<?php echo $entry_exclude_help; ?>"><?php echo $entry_exclude; ?></span></label>
               <div class="col-sm-10">
                 <textarea name="security_fs_exclude" id="input-exclude" class="form-control" cols="30" rows="10"><?php echo $security_fs_exclude; ?></textarea>
+                <div class="help-block"><?php echo $entry_exclude_help_block; ?></div>
               </div>
             </div>
           </fieldset>

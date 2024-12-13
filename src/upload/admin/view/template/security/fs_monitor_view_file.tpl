@@ -7,7 +7,7 @@
 </head>
 <body>
 <div id="editor"><?php echo htmlspecialchars($content, ENT_QUOTES, 'UTF-8'); ?></div>
-<script src="https://cdn.jsdelivr.net/g/ace@1.2.4(min/ace.js+min/mode-php.js+min/mode-rhtml.js+min/snippets/javascript.js+min/snippets/css.js+min/snippets/json.js+min/mode-xml.js)" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/g/ace@1.2.4(min/ace.js+min/mode-php.js+min/mode-rhtml.js+min/mode-twig.js+min/snippets/javascript.js+min/snippets/css.js+min/snippets/json.js+min/mode-xml.js)" type="text/javascript" charset="utf-8"></script>
 <script>
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");

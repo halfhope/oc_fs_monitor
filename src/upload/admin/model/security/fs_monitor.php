@@ -110,6 +110,12 @@ class ModelSecurityFSMonitor extends Model
 
     }
 
+    public function getLastScan()
+    {
+        $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg ORDER BY sfmg.scan_id DESC LIMIT 0,1");
+        return $result->row;
+    }
+
     public function getScans($data = array())
     {
         // $data = array(
