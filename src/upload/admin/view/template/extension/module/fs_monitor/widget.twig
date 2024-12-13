@@ -1,0 +1,83 @@
+<div class="tile tile-primary security-scan" id="fs_monitor_block">
+	<div class="tile-heading">
+		{{ heading_title }}
+		<div class="pull-right">
+			<a href="{{ view_all }}">{{ text_view_all }}</a>
+		</div>
+	</div>
+
+	<div class="tile-body">
+		{{ scan.user_name }},&nbsp;{{ scan.date_added_ago }}
+
+		{% if scan.scanned_count %}
+		<a href="{{ scan.href }}#scanned">
+			<span class="files-scanned label label-default" data-toggle="tooltip" title="{{ text_label_scanned }}">
+				<div class="fa fa-file-o"></div>&nbsp;{{ scan.scanned_count }}
+			</span>
+		</a>&nbsp;
+		{% endif %}
+
+		{% if scan.new_count %}
+		<a href="{{ scan.href }}#new">
+			<span class="files-added label label-success" data-toggle="tooltip" title="{{ text_label_new }}">
+				<div class="fa fa-plus"></div>&nbsp;{{ scan.new_count }}
+			</span>
+		</a>&nbsp;
+		{% endif %}
+
+		{% if scan.changed_count %}
+		<a href="{{ scan.href }}#changed">
+			<span class="files-changed label label-warning" data-toggle="tooltip" title="{{ text_label_changed }}">
+				<div class="fa fa-ellipsis-h"></div>&nbsp;{{ scan.changed_count }}
+			</span>
+		</a>&nbsp;
+		{% endif %}
+
+		{% if scan.deleted_count %}
+		<a href="{{ scan.href }}#deleted">
+			<span class="files-deleted label label-danger" data-toggle="tooltip" title="{{ text_label_deleted }}">
+				<div class="fa fa-minus"></div>&nbsp;{{ scan.deleted_count }}
+			</span>
+		</a>&nbsp;
+		{% endif %}
+
+		{% if scan.scan_size_rel == 0 %}
+			<span class="label label-info" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}>">{{ scan.scan_size_rel_humanized }}</span>
+		{% else %}
+			{% if scan.scan_size_rel > 0 %}
+			<span class="files-added label label-success" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">
+				<div class="fa fa-plus"></div>&nbsp;{{ scan.scan_size_rel_humanized }}
+			</span>
+			{% else %}
+			<span class="files-added label label-danger" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">
+				<div class="fa fa-minus"></div>&nbsp;{{ scan.scan_size_rel_humanized }}
+			</span>
+			{% endif %}
+		{% endif %}
+		<div class="pull-right mtop">
+			<a href="{{ scan.href }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-primary btn-sm"><i class="fa fa-eye"></i></a>
+			<button data-loading-text="{{ button_scan_loading }}" id="fs_monitor_scan_btn" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button>
+		</div>
+	</div>
+	<style>
+		.security-scan span.label{font-size:10pt}
+		.security-scan .btn > i.fa{font-size:11px;opacity:1}
+		.security-scan i.fa.dark{color:#555}
+		.security-scan .pull-right.mtop{margin-top:-5px}
+		.security-scan .tile-body {line-height:normal}
+	</style>
+	<script>
+		$('#fs_monitor_scan_btn').on('click', function(event) {
+			event.preventDefault();
+			$('#fs_monitor_scan_btn').button('loading');
+			$.ajax({
+				url: '{{ reload_widget }}',
+				type: 'GET',
+				dataType: 'html'
+			})
+			.success(function(response) {
+				$('#fs_monitor_block').html($(response).filter('#fs_monitor_block').html());
+			});
+		});
+	</script>
+</div>

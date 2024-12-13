@@ -34,8 +34,8 @@ $_['text_modules']					= 'Module';
 $_['text_settings']					= 'Einstellungen';
 $_['text_modal_title']				= 'Neuer Scan';
 $_['text_modal_rename_title']		= 'Scan umbenennen';
-$_['text_scan_name_placeholder']	= 'Weitere Module';
-$_['text_scans_on']					= 'Überprüft am';
+$_['text_scan_name_placeholder']	= 'Name der neuen Dateiüberprüfung';
+$_['text_scans_on']					= 'Überprüfe ';
 $_['text_label_scanned']			= 'Überprüft';
 $_['text_label_new']				= 'Neu';
 $_['text_label_changed']			= 'Geändert';
@@ -65,8 +65,6 @@ $_['entry_admin_dir']				= 'Adminverzeichnis';
 $_['entry_base_path']				= 'Basispfad';
 $_['entry_extensions']				= 'Erweiterungen';
 $_['entry_extensions_help']			= 'Pro Zeile 1 Erweiterung';
-$_['entry_include']					= 'Inkludiere Verzeichnisse';
-$_['entry_exclude']					= 'Exkludiere Verzeichnisse';
 $_['entry_cron_access_key']			= 'Cron Zugangsschlüssel';
 $_['entry_cron_wget']				= 'wget';
 $_['entry_cron_curl']				= 'curl';
@@ -75,6 +73,14 @@ $_['entry_cron_save']				= 'Sichere Cronscan';
 $_['entry_cron_save_help']			= 'Ausgeführte Scans per Cron werden als einfache Scans hinzugefügt';
 $_['entry_cron_notify']				= 'Benachrichtige bei Änderungen';
 $_['entry_cron_notify_help']		= 'Werden Änderungen am Dateisystem entdeckt, erfolgt eine Benachrichtigung';
+
+$_['entry_include']					= 'Verzeichnisse inklusive';
+$_['entry_include_help']			= 'Pro Zeile ein Verzeichnis (keine Dateien, keine Wildcards *)';
+$_['entry_include_help_block']		= 'Nur absolute Pfade dürfen vewendet werden<br>Beispiel: <code/var/www/username/www-data/andere_webseite.com/</code>';
+$_['entry_exclude']					= 'Ausgenommen Verzeichnisse und Dateien';
+$_['entry_exclude_help']			= 'Pro Zeile eine Angabe';
+$_['entry_exclude_help_block']		= 'Es können sowohl absolute als auch relative Pfade angegeben werden, auch Wildcards *.<br>Beispiel:<ul><li>/var/www/username/www-data/andere_webseite.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+
 
 // Interval datetime functions
 $_['text_interval_days']					= 'Tage';
@@ -110,8 +116,8 @@ $_['text_interval_tomorrow_at']				= 'Morgen um';
 $_['button_scan']							= 'Scan';
 $_['button_rename']							= 'Umbenennen';
 $_['button_settings']						= 'Einstellungen';
-$_['button_scan_loading']					= 'Scanne .. bitte um etwas Geduld ..';
-$_['button_rename_loading']					= 'Benenne um ..';
+$_['button_scan_loading']					= 'Scanne ..';
+$_['button_rename_loading']					= 'Benenn um ..';
 $_['button_save']							= 'Sichern';
 $_['button_delete']							= 'Löschen';
 $_['button_cancel']							= 'Abbrechen';

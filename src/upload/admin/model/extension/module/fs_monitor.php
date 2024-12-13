@@ -3,38 +3,32 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-class ModelExtensionModuleFSMonitor extends ModelModuleFSMonitor {}
+class ModelExtensionModuleFSMonitor extends Model {
 
-class ModelModuleFSMonitor extends Model
-{
-	public $_version = '1.0.0';
+	public $_version = '1.2';
 
-	private function pack_data($object)
-	{
+	private function pack_data($object) {
 		return base64_encode(gzdeflate(json_encode($object)));
 	}
 
-	private function unpack_data($object)
-	{
+	private function unpack_data($object) {
 		return json_decode(gzinflate(base64_decode($object)), true);
 	}
 	
-	private function compatibleEditSetting($key, $value, $code, $store_id = 0){
+	private function editSetting($key, $value, $code, $store_id = 0) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = '".$this->db->escape($key)."'");
 		return $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '".(int)$store_id."', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
 	}
 
 	public function getTotalScans(){
 		$query = $this->db->query("SELECT scan_id FROM `" . DB_PREFIX . "security_filesystem_monitor_generated`");
-
 		return $query->num_rows;
 	}
 
-	public function addScan($name, $files, $scan_size, $user = false)
-	{
-		$user_name = ($user) ? $user : $this->user->getUserName();
+	public function addScan($name, $files, $scan_size, $user = false) {
 
-		$packed = $this->pack_data(array('scanned' => $files));
+		$user_name = ($user) ? $user : $this->user->getUserName();
+		$packed = $this->pack_data(['scanned' => $files]);
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_data` (scan_data) VALUES ('" . $this->db->escape($packed) . "');");
 
@@ -44,30 +38,29 @@ class ModelModuleFSMonitor extends Model
 
 		$last_scan = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_data` AS sfmd LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_generated` sfmg ON sfmg.scan_id = sfmd.scan_id WHERE sfmd.scan_id < " . (int) $scan_id . " ORDER BY sfmd.scan_id DESC LIMIT 0, 1");
 
-		$scan = array(
+		$scan = [
 			'scan_id' => $scan_id,
-			'scan_data' => array(
+			'scan_data' => [
 				'scanned' => $files,
-			),
+			],
 			'scan_size' => $scan_size,
-		);
+		];
 
 		if ($last_scan->num_rows == 1) {
 			$last_scan->row['scan_data'] = $this->unpack_data($last_scan->row['scan_data']);
-			$to_update = array($scan, $last_scan->row);
+			$to_update = [$scan, $last_scan->row];
 		}else{
-			$to_update = array($scan);
+			$to_update = [$scan];
 		}
 
 		$scans = $this->fs_scans->getScansDiff($to_update);
 
-		$this->updateScansData(array($scans[0]));
+		$this->updateScansData([$scans[0]]);
 
 		return $scan_id;
 	}
 
-	public function getScan($scan_id, $full = false)
-	{
+	public function getScan($scan_id, $full = false) {
 		if($full){
 			$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id WHERE sfmg.scan_id = " . (int) $scan_id);
 			$result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
@@ -77,8 +70,7 @@ class ModelModuleFSMonitor extends Model
 		return $result->row;
 	}
 
-	public function deleteScan($scan_id)
-	{
+	public function deleteScan($scan_id) {
 
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` WHERE `scan_id` = " . (int) $scan_id);
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "security_filesystem_monitor_data` WHERE `scan_id` = " . (int) $scan_id);
@@ -86,7 +78,6 @@ class ModelModuleFSMonitor extends Model
 		$next_scan = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_data` AS sfmg WHERE scan_id > " . (int) $scan_id . " ORDER BY scan_id ASC LIMIT 0, 1 ");
 
 		if ($next_scan->num_rows == 1) {
-
 			$last_scan = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_data` AS sfmg WHERE scan_id < " . (int) $scan_id . " ORDER BY scan_id DESC LIMIT 0, 1 ");
 
 			if ($last_scan->num_rows == 1) {
@@ -103,8 +94,7 @@ class ModelModuleFSMonitor extends Model
 
 	}
 
-	public function getScans($data = array())
-	{
+	public function getScans($data = array()) {
 		
 		$sql = "SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` ORDER BY scan_id DESC";
 
@@ -112,11 +102,9 @@ class ModelModuleFSMonitor extends Model
 			if ($data['start'] < 0) {
 				$data['start'] = 0;
 			}
-
 			if ($data['limit'] < 1) {
 				$data['limit'] = 20;
 			}
-
 			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 		}
 
@@ -125,41 +113,34 @@ class ModelModuleFSMonitor extends Model
 		return $scans->rows;
 	}
 
-	public function getLastScan()
-	{
+	public function getLastScan() {
 		$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg ORDER BY sfmg.scan_id DESC LIMIT 0,1");
 		return $result->row;
 	}
 
-	public function rename($scan_id, $scan_name)
-	{
+	public function rename($scan_id, $scan_name) {
 		$query = $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_generated` SET `name` = '" . $this->db->escape($scan_name) . "' WHERE `scan_id` = " . (int)$scan_id);
 		return $query;
 	}
 
-	public function updateScansData($scans)
-	{
+	public function updateScansData($scans) {
 		foreach ($scans as $key => $scan) {
 			$this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_data` SET scan_data = '" . $this->pack_data($scan['scan_data']) . "' WHERE scan_id = " . (int)($scan['scan_id']));
 			$this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_generated` SET scan_size_abs = " . (int) $scan['scan_size'] . ", scan_size_rel = " . (int) (($scan['size_up']) ? $scan['scan_size_compared'] : -$scan['scan_size_compared']) . ", new_count = " . (int) $scan['new_count'] . ", changed_count = " . (int) $scan['changed_count'] . ", deleted_count = " . (int) $scan['deleted_count'] . ", scanned_count = " . (int) $scan['scanned_count'] . " WHERE scan_id = " . (int)($scan['scan_id']));
 		}
 	}
 
-	public function checkAndInstall($replace = false)
-	{
+	public function install($replace = false) {
 
-		$this->db->query("
-		CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_data`
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_data`
 		(
 			`scan_id` INT(11) NOT NULL AUTO_INCREMENT,
 			`scan_data` MEDIUMTEXT COLLATE utf8_general_ci NOT NULL,
 			PRIMARY KEY (`scan_id`)
 		)
-		ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
-		");
+		ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
 
-		$this->db->query("
-		CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_generated`
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "security_filesystem_monitor_generated`
 		(
 			`scan_id` INT(11) NOT NULL,
 			`scan_size` INT(11) NOT NULL,
@@ -175,87 +156,24 @@ class ModelModuleFSMonitor extends Model
 			`date_added` DATETIME,
 			PRIMARY KEY (`scan_id`)
 		)
-		ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci
-		");
+		ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+		
+		$defaults = [
+			'security_fs_admin_dir' => basename(DIR_APPLICATION),
+			'security_fs_base_path' => realpath(DIR_APPLICATION . '..'),
+			'security_fs_extensions' => str_replace('|', PHP_EOL, 'php5|php42|php4|php3|php|tpl|twig|phpt|phps|phtm|phtml|phar|asp|aspx|sh|bash|zsh|csh|tsch|pl|py|pyc|jsp|cgi|cfm|css|js'),
+			'security_fs_cron_access_key' => md5(mt_rand()),
+			'security_fs_cron_save' => 1,
+			'security_fs_cron_notify' => 1,
+			'security_fs_exclude' => str_replace('|', PHP_EOL, 'system/storage/cache/|system/storage/modification/')
+		];
 
-		$security_fs_admin_dir = $this->config->get('security_fs_admin_dir');
-		if (empty($security_fs_admin_dir) || $replace) {
-			$security_fs_admin_dir = basename(DIR_APPLICATION);
-			$this->compatibleEditSetting('security_fs_admin_dir', $security_fs_admin_dir, 'security_fs');
-		}
-
-		$security_fs_base_path = $this->config->get('security_fs_base_path');
-		if (empty($security_fs_base_path) || $replace) {
-			$security_fs_base_path = realpath(DIR_APPLICATION . '..');
-			$this->compatibleEditSetting('security_fs_base_path', $security_fs_base_path, 'security_fs');
-		}
-
-		$security_fs_extensions = $this->config->get('security_fs_extensions');
-		if (empty($security_fs_extensions) || $replace) {
-			$security_fs_extensions = str_replace('|', PHP_EOL, 'php5|php42|php4|php3|php|tpl|twig|phpt|phps|phtm|phtml|phar|asp|aspx|sh|bash|zsh|csh|tsch|pl|py|pyc|jsp|cgi|cfm|css|js');
-			$this->compatibleEditSetting('security_fs_extensions', $security_fs_extensions, 'security_fs');
-		}
-
-		$security_fs_cron_access_key = $this->config->get('security_fs_cron_access_key');
-		if (empty($security_fs_cron_access_key) || $replace) {
-			$this->compatibleEditSetting('security_fs_cron_access_key', md5(mt_rand()), 'security_fs');
-		}
-
-		$security_fs_cron_save = $this->config->get('security_fs_cron_save');
-		if (is_null($security_fs_cron_save) || $replace) {
-			$this->compatibleEditSetting('security_fs_cron_save', 1, 'security_fs');
-		}
-
-		$security_fs_cron_notify = $this->config->get('security_fs_cron_notify');
-		if (is_null($security_fs_cron_notify) || $replace) {
-			$this->compatibleEditSetting('security_fs_cron_notify', 1, 'security_fs');
-		}
-
-		$tables = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "security_filesystem_monitor'");
-
-		if ($tables->num_rows) {
-
-			$scans = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor` ORDER BY scan_id ASC");
-
-			foreach ($scans->rows as $key => $scan) {
-
-				$scan['scan_data'] = $scans->rows[$key]['scan_data'] = $scans->rows[$key]['scan_data'] = $this->unpack_data($scan['scan_data']);
-
-				$scan['auto'] = $scans->rows[$key]['auto'] = ($scan['name'] == $this->language->get('text_cron_scan_name')) ? true : false;
-
-				$scan_data = array(
-					'scanned'   => $scan['scan_data']['scanned'],
-					'new'       => $scan['scan_data']['new'],
-					'changed'   => $scan['scan_data']['changed'],
-					'deleted'   => $scan['scan_data']['deleted'],
-				);
-
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_data` (scan_data) VALUES ('" . $this->db->escape($this->pack_data($scan_data)) . "');");
-
-				$new_scan_id = $this->db->getLastId();
-
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor_generated` (scan_id, scan_size, user_name, name, auto, date_added) VALUES (" . (int) $new_scan_id . "," . (int) $scan['scan_size'] . ",'" . $this->db->escape($scan['user_name']) . "','" . $this->db->escape($scan['name']) . "', " . (int)$scan['auto'] . ", '" . $this->db->escape($scan['date_added']) . "');");
-
+		foreach ($defaults as $key => $value) {
+			$setting = $this->config->get($key);
+			if (empty($setting) || $replace) {
+				$this->editSetting($key, $value, 'security_fs');				
 			}
-
-			$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "security_filesystem_monitor`");
-
-			foreach ($scans->rows as $key => $scan) {
-				$this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor_generated` SET scan_size_abs = " . (int) $scan['scan_data']['scan_size'] . ", scan_size_rel = " . (int) (($scan['scan_data']['size_up']) ? $scan['scan_data']['scan_size_compared'] : -$scan['scan_data']['scan_size_compared']) . ", new_count = " . (int) $scan['scan_data']['new_count'] . ", changed_count = " . (int) $scan['scan_data']['changed_count'] . ", deleted_count = " . (int) $scan['scan_data']['deleted_count'] . ", scanned_count = " . (int) $scan['scan_data']['scanned_count'] . " WHERE scan_id = " . (int)($scan['scan_id']));
-			}
-
-			$scans = $this->getScans();
-
-			foreach ($scans as $key => $scan) {
-				$scans[$key] = $this->getScan($scan['scan_id'], true);
-			}
-
-			$diff = $this->fs_scans->getScansDiff($scans);
-
-			$this->updateScansData($diff);
-
 		}
-
 	}
 
 }
