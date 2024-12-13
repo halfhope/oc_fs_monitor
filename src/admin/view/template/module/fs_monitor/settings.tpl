@@ -126,6 +126,11 @@
 								</label>
 							</td>
 						</tr>
+					</table>
+					
+					<h2><?php echo $text_legend_notify ?></h2>
+
+					<table class="form">
 						<tr>
 							<td><?php echo $entry_cron_notify; ?>:<br><span class="help"><?php echo $entry_cron_notify_help; ?></span></td>
 							<td>
@@ -150,12 +155,75 @@
 							</td>
 						</tr>
 						<tr>
-							<td><?php echo $entry_emails; ?>:<br><span class="help"><?php echo $entry_emails_help; ?></span></td>
+							<td><?php echo $entry_notify_to; ?>:</td>
 							<td>
-								<input type="text" name="security_fs_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_emails; ?>"></textarea>
+								<select name="security_fs_notify_to" id="#input-notify-to" class="form-control">
+									<option value="email" <?php echo $security_fs_notify_to == 'email' ? 'selected' : '' ?>><?php echo $tab_email ?></option>
+									<option value="whatsapp" <?php echo $security_fs_notify_to == 'whatsapp' ? 'selected' : '' ?>><?php echo $tab_whatsapp ?></option>
+									<option value="telegram" <?php echo $security_fs_notify_to == 'telegram' ? 'selected' : '' ?>><?php echo $tab_telegramm ?></option>
+								</select>
 							</td>
 						</tr>
 					</table>
+					
+					<div id="tabs" class="htabs">
+						<a href="#tab-email" class="active"><?php echo $tab_email; ?></a>
+						<a href="#tab-whatsapp"><?php echo $tab_whatsapp; ?></a>
+						<a href="#tab-telegram"><?php echo $tab_telegramm; ?></a>
+					</div>
+					
+					<div id="tab-email">
+						<table class="form">
+							<tr>
+								<td><?php echo $entry_e_emails; ?>:<br><span class="help"><?php echo $entry_e_emails_help; ?></span></td>
+								<td>
+									<input type="text" name="security_fs_e_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_e_emails; ?>">
+								</td>
+							</tr>
+						</table>
+					</div>
+					
+					<div id="tab-whatsapp">
+						<table class="form">
+							<tr>
+								<td><?php echo $entry_w_phone_number; ?>:</td>
+								<td>
+									<input type="text" name="security_fs_w_phone_number" id="input-emails" class="form-control" value="<?php echo $security_fs_w_phone_number; ?>">
+								</td>
+							</tr>
+							<tr>
+								<td><?php echo $entry_w_business_account_id; ?>:</td>
+								<td>
+									<input type="text" name="security_fs_w_business_account_id" id="input-emails" class="form-control" value="<?php echo $security_fs_w_business_account_id; ?>">
+								</td>
+							</tr>
+							<tr>
+								<td><?php echo $entry_w_api_token; ?>:</td>
+								<td>
+									<input type="text" name="security_fs_w_api_token" id="input-emails" class="form-control" value="<?php echo $security_fs_w_api_token; ?>">
+								</td>
+							</tr>
+						</table>
+						<div class="help-block"><?php echo $text_whatsapp_help; ?></div>
+					</div>
+
+					<div id="tab-telegram">
+						<table class="form">
+							<tr>
+								<td><?php echo $entry_t_api_token; ?>:</td>
+								<td>
+									<input type="text" name="security_fs_t_api_token" id="input-emails" class="form-control" value="<?php echo $security_fs_t_api_token; ?>">
+								</td>
+							</tr>
+							<tr>
+								<td><?php echo $entry_t_channel_id; ?>:</td>
+								<td>
+									<input type="text" name="security_fs_t_channel_id" id="input-emails" class="form-control" value="<?php echo $security_fs_t_channel_id; ?>">
+								</td>
+							</tr>
+						</table>
+						<div class="help-block"><?php echo $text_telegram_help; ?></div>
+					</div>
 
 				</form>
 			</div>
@@ -165,6 +233,8 @@
 <script>
 $(document).ready(function($) {
 
+	$('#tabs a').tabs();
+	
 	$('#input-cron-access-key').on('change keyup paste', function(event) {
 		event.preventDefault();
 		var output_field = $('#input-cron-wget');
