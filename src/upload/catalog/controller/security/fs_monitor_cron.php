@@ -2,7 +2,10 @@
 /**
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
-class ControllerSecurityFsMonitorCron extends Controller
+
+include_once(DIR_SYSTEM . 'library/security/compatible_controller.php');
+
+class ControllerSecurityFsMonitorCron extends CompatibleController
 {
     public function __construct($registry)
     {
@@ -10,33 +13,30 @@ class ControllerSecurityFsMonitorCron extends Controller
 
         $this->load->language('security/fs_monitor_cron');
 
-        if (version_compare('2.1', substr(VERSION, 0, 3)) == 0) {
-
-            $this->humanizer         = new Security\humanizer($registry);
-            $this->directory_scanner = new Security\directory_scanner($registry);
-            $this->fs_scans          = new Security\fs_scans($registry);
-
-        } else {
-
-            $this->load->library('security/humanizer');
-            $this->load->library('security/directory_scanner');
-            $this->load->library('security/fs_scans');
-
-        }
+        $this->compatibleLoadLibrary('security/humanizer');
+        $this->compatibleLoadLibrary('security/directory_scanner');
+        $this->compatibleLoadLibrary('security/fs_scans');
 
         $this->load->model('security/fs_monitor_cron');
 
         // add include paths
         $include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
         $include_paths[] = $this->config->get('security_fs_base_path');
-        $this->directory_scanner->setIncludePaths($include_paths);
+        if (!empty($include_paths)) {
+            $this->directory_scanner->setIncludePaths($include_paths);
+        }
 
         // add exclude paths
         $exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
-        $this->directory_scanner->setExcludePaths($exclude_paths);
+        if (!empty($exclude_paths)) {
+            $this->directory_scanner->setExcludePaths($exclude_paths);
+        }
 
         // add extensions
-        $this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
+        $extensions = $this->config->get('security_fs_extensions');
+        if (!empty($extensions)) {
+            $this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $extensions)));
+        }
 
     }
 
@@ -50,8 +50,6 @@ class ControllerSecurityFsMonitorCron extends Controller
             if (!$scans) {
 
                 $this->addScan($this->language->get('text_initial_scan'));
-
-                $this->recalculateScansData();
 
             }
 
@@ -67,7 +65,7 @@ class ControllerSecurityFsMonitorCron extends Controller
                     'scan_size' => (int) $scan_size,
                     'user_name' => $this->language->get('text_cron_scan_user'),
                     'name' => $this->language->get('text_cron_scan_name'),
-                    'date_added' => time(),
+                    'date_added' => date('Y-m-d H:i:s'),
                     'scan_data' => array(
                         'scanned' => $files
                     )
@@ -82,14 +80,12 @@ class ControllerSecurityFsMonitorCron extends Controller
                 // End compare scans
 
             // notify administrator
-            if ($scan['scan_data']['new_count'] || $scan['scan_data']['changed_count'] || $scan['scan_data']['deleted_count']) {
+            if ($scan['new_count'] || $scan['changed_count'] || $scan['deleted_count']) {
 
                 // add scan
                 if ($this->config->get('security_fs_cron_save')) {
 
                     $scan_id = $this->model_security_fs_monitor_cron->addScan($this->language->get('text_cron_scan_name'), $this->language->get('text_cron_scan_user'), $files, $scan_size);
-
-                    $this->recalculateScansData();
 
                     $scan = $this->model_security_fs_monitor_cron->getLastScan();
 
@@ -97,24 +93,25 @@ class ControllerSecurityFsMonitorCron extends Controller
 
                 $message = '';
 
-                if ($scan['scan_data']['new_count']) {
-                    $message .= sprintf('%d ' . $this->language->get('text_mail_new_files') . PHP_EOL, $scan['scan_data']['new_count']);
+                if ($scan['new_count']) {
+                    $message .= sprintf('%d ' . $this->language->get('text_mail_new_files') . PHP_EOL, $scan['new_count']);
                 }
 
-                if ($scan['scan_data']['changed_count']) {
-                    $message .= sprintf('%d ' . $this->language->get('text_mail_changed_files') . PHP_EOL, $scan['scan_data']['changed_count']);
+                if ($scan['changed_count']) {
+                    $message .= sprintf('%d ' . $this->language->get('text_mail_changed_files') . PHP_EOL, $scan['changed_count']);
                 }
 
-                if ($scan['scan_data']['deleted_count']) {
-                    $message .= sprintf('%d ' . $this->language->get('text_mail_deleted_files') . PHP_EOL, $scan['scan_data']['deleted_count']);
+                if ($scan['deleted_count']) {
+                    $message .= sprintf('%d ' . $this->language->get('text_mail_deleted_files') . PHP_EOL, $scan['deleted_count']);
                 }
 
                 if (!empty($message)) {
-                    $message = sprintf($this->language->get('text_mail_header'), date($this->language->get('datetime_format'), (int) $scan['date_added'])) . PHP_EOL . $message;
+                    $datetime_format = ($this->language->get('datetime_format') == 'datetime_format') ? $this->language->get('date_format_short') : $this->language->get('datetime_format');
+                    $message = sprintf($this->language->get('text_mail_header'), date($datetime_format, time())) . PHP_EOL . $message;
                     if ($this->config->get('security_fs_cron_notify')) {
 
                         if ($this->config->get('security_fs_cron_save')) {
-                            $link = HTTP_SERVER . 'admin/index.php?route=security/fs_monitor/view&scan_id=' . $scan['scan_id'];
+                            $link = HTTP_SERVER . $this->config->get('security_fs_admin_dir') .'/index.php?route=security/fs_monitor/view&scan_id=' . $scan['scan_id'];
                             $message .= $this->language->get('text_mail_link') . '<a href="' . $link . '">' . $link . '</a>';
                         }
 
@@ -132,17 +129,13 @@ class ControllerSecurityFsMonitorCron extends Controller
                         $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
                         $mail->setSubject(html_entity_decode($this->language->get('text_mail_subject'), ENT_QUOTES, 'UTF-8'));
                         $mail->setHtml(nl2br($message));
-                        $mail->setText($message);
+                        $mail->setText(strip_tags($message));
                         $mail->send();
-                    }
-                    if (!$this->config->get('security_fs_cron_save')) {
-                        $this->model_security_fs_monitor_cron->removeScanNotification();
-                        $this->model_security_fs_monitor_cron->setScanNotification($message);
                     }
                 }
             }
         } else {
-            $this->response->redirect($this->url->link('common/home'));
+            $this->compatibleRedirect($this->url->link('common/home'));
         }
     }
 
@@ -152,18 +145,9 @@ class ControllerSecurityFsMonitorCron extends Controller
 
         $scan_size = $this->fs_scans->getScanSize($files);
 
-        $scan_id = $this->model_security_fs_monitor_cron->addScan($name, $this->language->get('text_cron_scan_user'), $files, $scan_size);
+        $scan_id = $this->model_security_fs_monitor->addScan($name, $files, $scan_size);
 
         return $scan_id;
     }
 
-    private function recalculateScansData()
-    {
-        $scans = $this->model_security_fs_monitor_cron->getScans();
-
-        $scansDiff = $this->fs_scans->getScansDiff($scans);
-
-        $this->model_security_fs_monitor_cron->updateScansData($scansDiff);
-
-    }
 }

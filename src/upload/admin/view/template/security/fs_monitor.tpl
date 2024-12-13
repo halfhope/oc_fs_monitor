@@ -54,31 +54,31 @@
                 </div>
 
                 <div class="changes-list col-sm-3 col-xs-6">
-                  <?php if ($scan['scan_data']['scanned']): ?>
-                  <a href="<?php echo $scan['href'] ?>#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">  <div class="fa fa-file-o"></div> <?php echo $scan['scan_data']['scanned_count'] ?></span></a>
+                  <?php if ($scan['scanned_count']): ?>
+                  <a href="<?php echo $scan['href'] ?>#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">  <div class="fa fa-file-o"></div> <?php echo $scan['scanned_count'] ?></span></a>
                   <?php endif ?>
 
-                  <?php if ($scan['scan_data']['new']): ?>
-                  <a href="<?php echo $scan['href'] ?>#new"><span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $text_label_new; ?>">    <div class="fa fa-plus"></div> <?php echo $scan['scan_data']['new_count'] ?></span></a>
+                  <?php if ($scan['new_count']): ?>
+                  <a href="<?php echo $scan['href'] ?>#new"><span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $text_label_new; ?>">    <div class="fa fa-plus"></div> <?php echo $scan['new_count'] ?></span></a>
                   <?php endif ?>
 
-                  <?php if ($scan['scan_data']['changed']): ?>
-                  <a href="<?php echo $scan['href'] ?>#changed"><span class="files-changed label label-warning" data-toggle="tooltip" title="<?php echo $text_label_changed; ?>">  <div class="fa fa-ellipsis-h"></div> <?php echo $scan['scan_data']['changed_count'] ?></span></a>
+                  <?php if ($scan['changed_count']): ?>
+                  <a href="<?php echo $scan['href'] ?>#changed"><span class="files-changed label label-warning" data-toggle="tooltip" title="<?php echo $text_label_changed; ?>">  <div class="fa fa-ellipsis-h"></div> <?php echo $scan['changed_count'] ?></span></a>
                   <?php endif ?>
 
-                  <?php if ($scan['scan_data']['deleted']): ?>
-                  <a href="<?php echo $scan['href'] ?>#deleted"><span class="files-deleted label label-danger" data-toggle="tooltip" title="<?php echo $text_label_deleted; ?>">  <div class="fa fa-minus"></div> <?php echo $scan['scan_data']['deleted_count'] ?></span></a>
+                  <?php if ($scan['deleted_count']): ?>
+                  <a href="<?php echo $scan['href'] ?>#deleted"><span class="files-deleted label label-danger" data-toggle="tooltip" title="<?php echo $text_label_deleted; ?>">  <div class="fa fa-minus"></div> <?php echo $scan['deleted_count'] ?></span></a>
                   <?php endif ?>
                 </div>
 
                 <div class="changes-list col-sm-3 col-xs-3">
-                  <?php if ($scan['scan_data']['scan_size_compared'] == 0): ?>
-                    <span class="label label-info" data-toggle="tooltip" title="<?php echo $scan['scan_data']['scan_size_humanized'] ?>"><?php echo $scan['scan_data']['scan_size_compared_humanized'] ?></span>
+                  <?php if ($scan['scan_size_rel'] == 0): ?>
+                    <span class="label label-info" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>"><?php echo $scan['scan_size_rel_humanized'] ?></span>
                   <?php else: ?>
-                    <?php if ($scan['scan_data']['size_up']): ?>
-                    <span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $scan['scan_data']['scan_size_humanized'] ?>">    <div class="fa fa-plus"></div> <?php echo $scan['scan_data']['scan_size_compared_humanized'] ?></span>
+                    <?php if ($scan['scan_size_rel'] > 0): ?>
+                    <span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">    <div class="fa fa-plus"></div> <?php echo $scan['scan_size_rel_humanized'] ?></span>
                     <?php else: ?>
-                    <span class="files-added label label-danger" data-toggle="tooltip" title="<?php echo $scan['scan_data']['scan_size_humanized'] ?>">    <div class="fa fa-minus"></div> <?php echo $scan['scan_data']['scan_size_compared_humanized'] ?></span>
+                    <span class="files-added label label-danger" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">    <div class="fa fa-minus"></div> <?php echo $scan['scan_size_rel_humanized'] ?></span>
                     <?php endif ?>
                   <?php endif ?>
                 </div>
@@ -97,6 +97,7 @@
             </div>
           </form>
         </div>
+        <div class="pagination"><?php echo $pagination ?></div>
       </div>
     </div>
   </div>
@@ -110,9 +111,6 @@
         <h4 class="modal-title"><?php echo $text_modal_title ?></h4>
       </div>
       <div class="modal-body">
-        <?php if ($scan_notification): ?>
-          <p><?php echo $scan_notification ?></p>
-        <?php endif ?>
         <form action="<?php echo $action_scan; ?>" method="post" enctype="multipart/form-data" id="form-scan">
           <div class="form-group required">
             <label for="scan_name" class="control-label"><?php echo $entry_scan_name ?></label>
@@ -128,9 +126,6 @@
   </div>
 </div>
 <script>
-<?php if ($scan_notification): ?>
-  $('#addScan').modal();
-<?php endif ?>
   $('#button-scan').click(function(event) {
     event.preventDefault();
     $('#addScan').modal();
@@ -138,7 +133,6 @@
 
   $('#scanNow').click(function(event){
     event.preventDefault();
-    if ($('')) {}
     $('#form-scan').submit();
   });
 
@@ -161,7 +155,10 @@
 
   $('#button-delete').on('click', function(event) {
     event.preventDefault();
-    $('#form-scans-list').submit();
+    var checked = $('input[type="checkbox"][name^="scans"]:checked').length;
+    if (checked >= 1) {
+      $('#form-scans-list').submit();
+    }
   });
 </script>
 <?php echo $footer; ?>
