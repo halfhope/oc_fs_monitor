@@ -110,10 +110,10 @@
 						</div>
 					</div>
 					{% if scan.new_count %}
-						<div class="table-caption">
+						<div class="table_caption">
 							<span id="new" onClick="$('.table-new').toggle(1);" class="accordeon_toggle">{{ text_label_new }}&nbsp;
 								<span class="label label-success">
-									<div class="fa fa-plus"></div>&nbsp;{{ new_count }}
+									<div class="fa fa-plus"></div>&nbsp;{{ scan.new_count }}
 								</span>
 							</span>&nbsp;
 							<span class="label label-default btn-copy" data-target="table-new" data-toggle="tooltip" title="{{ button_copy }}">

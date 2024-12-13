@@ -3,13 +3,11 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-class ControllerExtensionDashboardFSMonitor extends ControllerDashboardFSMonitor {}
+class ControllerExtensionDashboardFSMonitor extends Controller {
 
-class ControllerDashboardFSMonitor extends Controller
-{
-	private $error = array();
+	private $error = [];
 
-	public 	$_version 			= '1.1.2';
+	public 	$_version 			= '1.2';
 	private	$_module_route 		= 'extension/module/fs_monitor';
 	private	$_dashboard_route 	= 'extension/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
@@ -19,19 +17,17 @@ class ControllerDashboardFSMonitor extends Controller
 		$this->load->language($this->_dashboard_route);
 
 		$this->document->setTitle($this->language->get('heading_title'));
-
+		$data['heading_title'] = $this->language->get('heading_title');
+		
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$this->model_setting_setting->editSetting('dashboard_fs_monitor', $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
-
 			$this->response->redirect($this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true));
 		}
 
-		$data['heading_title'] = $this->language->get('heading_title');
-		
 		$data['text_edit'] = $this->language->get('text_edit');
 		$data['text_enabled'] = $this->language->get('text_enabled');
 		$data['text_disabled'] = $this->language->get('text_disabled');
@@ -49,25 +45,24 @@ class ControllerDashboardFSMonitor extends Controller
 			$data['error_warning'] = '';
 		}
 
-		$data['breadcrumbs'] = array();
+		$data['breadcrumbs'] = [];
 
-		$data['breadcrumbs'][]  = array(
+		$data['breadcrumbs'][]  = [
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
-		);
+		];
 		
-		$data['breadcrumbs'][]  = array(
+		$data['breadcrumbs'][]  = [
 			'text' => $this->language->get('text_extension'),
 			'href' => $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true)
-		);
+		];
 
-		$data['breadcrumbs'][]  = array(
+		$data['breadcrumbs'][]  = [
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link($this->_dashboard_route, 'user_token=' . $this->session->data['user_token'], true)
-		);
+		];
 
 		$data['action'] = $this->url->link($this->_dashboard_route, 'user_token=' . $this->session->data['user_token'], true);
-
 		$data['cancel'] = $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true);
 
 		if (isset($this->request->post['dashboard_fs_monitor_width'])) {
@@ -76,7 +71,7 @@ class ControllerDashboardFSMonitor extends Controller
 			$data['dashboard_fs_monitor_width'] = $this->config->get('dashboard_fs_monitor_width');
 		}
 	
-		$data['columns'] = array(6, 12);
+		$data['columns'] = [6, 12];
 			
 		if (isset($this->request->post['dashboard_fs_monitor_status'])) {
 			$data['dashboard_fs_monitor_status'] = $this->request->post['dashboard_fs_monitor_status'];
@@ -105,8 +100,7 @@ class ControllerDashboardFSMonitor extends Controller
 		return !$this->error;
 	}
 
-	public function dashboard()
-	{
+	public function dashboard() {
 		return $this->load->controller($this->_module_route . '/widget');
 	}
 }

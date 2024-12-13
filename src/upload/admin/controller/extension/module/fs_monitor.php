@@ -3,56 +3,23 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-class ControllerExtensionModuleFsMonitor extends ControllerModuleFsMonitor {}
+class ControllerExtensionModuleFsMonitor extends Controller {
 
-class ControllerModuleFsMonitor extends Controller
-{
-	private $error = array();
+	private $error = [];
 	
-	public 	$_version 			= '1.1.2';
+	public 	$_version 			= '1.2';
 	private	$_module_route 		= 'extension/module/fs_monitor';
 	private	$_dashboard_route	= 'extension/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 	private	$_model 			= 'model_extension_module_fs_monitor';
-	
-	/**
-	 * constructor
-	 * @param 	object $registry
-	 * @return 	void
-	 **/
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
-
-		$this->load->language($this->_module_route);
-		$this->load->model($this->_module_route);
-
-		$this->humanizer = new Security\humanizer($registry);
-		$this->directory_scanner = new Security\directory_scanner($registry);
-		$this->fs_scans = new Security\fs_scans($registry);
-
-		// add include paths
-		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
-		$include_paths[] = $this->config->get('security_fs_base_path');
-		$this->directory_scanner->setIncludePaths($include_paths);
-
-		// add exclude paths
-		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
-		$this->directory_scanner->setExcludePaths($exclude_paths);
-
-		// add default replace path
-		$this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
-		
-		// add extensions
-		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
-	}
 
 	/**
 	 * install
 	 * @return void
 	 **/
 	public function install() {
-		$this->{$this->_model}->checkAndInstall(true);
+		$this->load->model($this->_module_route);
+		$this->{$this->_model}->install(true);
 	}
 
 	/**
@@ -60,6 +27,7 @@ class ControllerModuleFsMonitor extends Controller
 	 * @return void
 	 **/
 	public function uninstall() {
+		$this->load->model($this->_module_route);
 		$this->{$this->_model}->uninstall();
 	}
 
@@ -67,30 +35,28 @@ class ControllerModuleFsMonitor extends Controller
 	 * main section
 	 * @return void
 	 **/
-	public function index()
-	{
+	public function index() {
+		$this->load->model($this->_module_route);
 		$data = $this->language->load($this->_module_route);
+
+		$this->humanizer = new Security\humanizer($this->registry);
 
 		$this->document->setTitle($this->language->get('heading_title'));
 		$data['panel_title']   = $this->language->get('text_fs_monitor');
 		
-		$this->{$this->_model}->checkAndInstall(false);
+		$this->{$this->_model}->install(false);
 
 		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateScan()) {
-			
 			if (!isset($this->request->post['scan_name']) || empty($this->request->post['scan_name'])) {
-
 				$this->session->data['error'] = $this->language->get('error_empty_name');
-				
 				$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
-
 			}
 
 			$scan_id = $this->createScan($this->request->post['scan_name']);
 			
 			$this->session->data['success'] = $this->language->get('text_success_scan_created');
-			
-			$this->url->link($this->_module_route, 'scan_id=' . (int) $scan_id . '&user_token=' . $this->session->data['user_token'], 'SSL');
+			$this->response->redirect($this->url->link($this->_module_route, 'scan_id=' . (int) $scan_id . '&user_token=' . $this->session->data['user_token'], 'SSL'));
+			;
 		}
 
 		if (isset($this->session->data['error'])) {
@@ -159,7 +125,6 @@ class ControllerModuleFsMonitor extends Controller
 		}
 
 		foreach ($scans as $key => $scan) {
-			
 			if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 				$date_key = $this->language->get('text_scans_on') . ' ' . iconv('windows-1251', 'utf-8', strftime('%A %d. %B %Y', strtotime($scan['date_added'])));
 			} else {
@@ -174,22 +139,22 @@ class ControllerModuleFsMonitor extends Controller
 			$data['scans'][$date_key][$key]['href']           = $this->url->link($this->_module_route . '/viewScan', 'scan_id=' . $data['scans'][$date_key][$key]['scan_id'] . '&user_token=' . $this->session->data['user_token'], 'SSL');
 		}
 
-		$data['breadcrumbs'] = array();
+		$data['breadcrumbs'] = [];
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 	
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_modules'),
 			'href' => $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
 		$data['action_scan']     = $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL');
 		$data['action_init']     = $this->url->link($this->_module_route . '/init', 'user_token=' . $this->session->data['user_token'], 'SSL');
@@ -208,17 +173,17 @@ class ControllerModuleFsMonitor extends Controller
 	 * view scan function
 	 * @return void
 	 **/
-	public function viewScan()
-	{
-
+	public function viewScan() {
+		$this->load->model($this->_module_route);
 		$data = $this->language->load($this->_module_route);
 
+		$this->humanizer = new Security\humanizer($this->registry);
+		
 		$this->document->setTitle($this->language->get('heading_title'));
 		$data['panel_title']     = $this->language->get('text_view');
 
 		if (isset($this->session->data['error'])) {
 			$data['error_warning'] = $this->session->data['error'];
-
 			unset($this->session->data['error']);
 		} elseif (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -228,7 +193,6 @@ class ControllerModuleFsMonitor extends Controller
 
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
-
 			unset($this->session->data['success']);
 		} else {
 			$data['success'] = '';
@@ -243,7 +207,7 @@ class ControllerModuleFsMonitor extends Controller
 		$scan_data = $data['scan']['scan_data'];
 		unset($data['scan']['scan_data']);
 
-		$scan_result = array();
+		$scan_result = [];
 
 		if ($scan_data['scanned']) {
 			foreach ($scan_data['scanned'] as $file_name => $file_data) {
@@ -286,27 +250,27 @@ class ControllerModuleFsMonitor extends Controller
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		$data['breadcrumbs'] = array();
+		$data['breadcrumbs'] = [];
 		
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 		
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_modules'),
 			'href' => $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 		
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 		
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_view'),
 			'href' => $this->url->link($this->_module_route . '/viewScan', 'scan_id=' . $data['scan']['scan_id'] . '&user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
 		$data['action_cancel']   = $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL');
 		$data['action_settings'] = $this->url->link($this->_module_route . '/settings', 'user_token=' . $this->session->data['user_token'], 'SSL');
@@ -321,44 +285,10 @@ class ControllerModuleFsMonitor extends Controller
 	}
 
 	/**
-	 * format file data for output
-	 * @param 	string 	$file_name
-	 * @param 	array 	$file_data
-	 * @return 	array
-	 **/
-	private function formatFile($file_name, $file_data)
-	{
-		if (isset($file_data['diff'])) { //changed
-			return array(
-				'filesize' => $this->humanizer->humanBytes($file_data['new']['filesize']) . $file_data['postfix'],
-				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
-				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
-				'filemtime' => date('d.m.Y H:i:s',$file_data['new']['filemtime']),
-				'filectime' => date('d.m.Y H:i:s',$file_data['new']['filectime']),
-				'fileperms' => substr(decoct($file_data['new']['fileperms']), -4),
-				'crc' => $file_data['new']['crc'],
-				'diff' => $file_data['diff']
-			);
-		} else {
-			return array(
-				'filesize' => $this->humanizer->humanBytes($file_data['filesize']),
-				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
-				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
-				'filemtime' => date('d.m.Y H:i:s',$file_data['filemtime']),
-				'filectime' => date('d.m.Y H:i:s',$file_data['filectime']),
-				'fileperms' => substr(decoct($file_data['fileperms']), -4),
-				'crc' => $file_data['crc']
-			);
-		}
-	}
-
-	/**
 	 * settings section
 	 * @return void
 	 **/
-	public function settings()
-	{
-
+	public function settings() {
 		$data = $this->language->load($this->_module_route);
 
 		$this->document->setTitle($this->language->get('heading_title') . ' - ' . $this->language->get('text_settings'));
@@ -367,18 +297,14 @@ class ControllerModuleFsMonitor extends Controller
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateSettings()) {
-
 			$this->model_setting_setting->editSetting('security_fs', $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success_saved');
-
 			$this->response->redirect($this->url->link($this->_module_route . '/settings', 'user_token=' . $this->session->data['user_token'], true));
-
 		}
 
 		if (isset($this->session->data['error'])) {
 			$data['error_warning'] = $this->session->data['error'];
-
 			unset($this->session->data['error']);
 		} elseif (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
@@ -388,7 +314,6 @@ class ControllerModuleFsMonitor extends Controller
 
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
-
 			unset($this->session->data['success']);
 		} else {
 			$data['success'] = '';
@@ -464,27 +389,27 @@ class ControllerModuleFsMonitor extends Controller
 		$data['security_fs_cron_curl'] = '/usr/local/bin/curl -s ' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_module_route . '&access_key=';
 		$data['security_fs_cron_cli']  = '/usr/local/bin/php -q ' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', DIR_APPLICATION) . 'index.php?route=' . $this->_module_route . '&access_key=';
 
-		$data['breadcrumbs'] = array();
+		$data['breadcrumbs'] = [];
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_modules'),
 			'href' => $this->url->link($this->_extensions_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('heading_title'),
 			'href' => $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 		
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_settings'),
 			'href' => $this->url->link($this->_module_route . '/settings', 'user_token=' . $this->session->data['user_token'], 'SSL')
-		);
+		];
 
 		$data['action_cancel']   = $this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL');
 		$data['action_generate'] = $this->url->link($this->_module_route . '/generateDefaultSettings', 'user_token=' . $this->session->data['user_token'], 'SSL');
@@ -498,155 +423,12 @@ class ControllerModuleFsMonitor extends Controller
 	}
 
 	/**
-	 * generate default settings for module
-	 * @return void
-	 **/
-	public function generateDefaultSettings()
-	{
-		if ($this->user->hasPermission('modify', $this->_module_route)) {
-
-			$this->{$this->_model}->checkAndInstall(true);
-
-			$this->session->data['success'] = $this->language->get('text_success_saved');
-
-			$this->response->redirect($this->url->link($this->_module_route . '/settings', 'user_token=' . $this->session->data['user_token'], true));
-
-		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-
-			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
-		}
-	}
-
-	/**
-	 * validate settings form data
-	 * @return bool
-	 **/
-	private function validateSettings()
-	{
-		if (!$this->user->hasPermission('modify', $this->_module_route)) {
-			$this->error['warning'] = $this->language->get('error_permission');
-		}
-
-		if (empty($this->request->post['security_fs_base_path'])) {
-			$this->error['base_path'] = $this->language->get('error_base_path');
-		}
-
-		if (empty($this->request->post['security_fs_extensions'])) {
-			$this->error['extensions'] = $this->language->get('error_extensions');
-		}
-
-		if (empty($this->request->post['security_fs_cron_access_key'])) {
-			$this->error['access_key'] = $this->language->get('error_cron_access_key');
-		}
-
-		if (!$this->error) {
-			return true;
-		} else {
-			if (!isset($this->error['warning'])) {
-				$this->error['warning'] = $this->language->get('error_form');
-			}
-			return false;
-		}
-	}
-
-	/**
-	 * rename scan
-	 * @return void
-	 **/
-	public function rename()
-	{
-		if ($this->user->hasPermission('modify', $this->_module_route)) {
-			if (isset($this->request->post['scan_name']) && !empty($this->request->post['scan_name'])) {
-
-				$scan_name = $this->request->post['scan_name'];
-
-				$this->{$this->_model}->rename((int)$this->request->get['scan_id'], $scan_name);
-
-				$this->session->data['success'] = $this->language->get('text_success_renamed');
-
-				$this->response->redirect($this->url->link($this->_module_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&user_token=' . $this->session->data['user_token'], true));
-
-			} else {
-
-				$this->session->data['error'] = $this->language->get('error_empty_name');
-
-				$this->response->redirect($this->url->link($this->_module_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&user_token=' . $this->session->data['user_token'], true));
-
-			}
-
-		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-
-			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
-		}
-	}
-
-	/**
-	 * delete scan
-	 * @return void
-	 **/
-	public function delete()
-	{
-
-		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->request->post['scans'] && $this->user->hasPermission('modify', $this->_module_route)) {
-
-			foreach ($this->request->post['scans'] as $key => $value) {
-				$this->{$this->_model}->deleteScan((int) $value);
-			}
-
-			$this->session->data['success'] = $this->language->get('text_success_scans_deleted');
-
-			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
-
-		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-
-			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
-		}
-
-	}
-
-	/**
-	 * create scan
-	 * @param 	string 	$name
-	 * @return 	int 	scan_id
-	 **/
-	private function createScan($name)
-	{
-		$files = $this->directory_scanner->getFiles();
-
-		$scan_size = $this->fs_scans->getScanSize($files);
-
-		$scan_id = $this->{$this->_model}->addScan($name, $files, $scan_size);
-
-		return $scan_id;
-	}
-
-	/**
-	 * validate scan before create
-	 * @return bool
-	 **/
-	private function validateScan()
-	{
-		if (!$this->user->hasPermission('modify', $this->_module_route)) {
-			$this->error['warning'] = $this->language->get('error_permission');
-		}
-
-		if (!$this->error) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * view file section
 	 * @return void
 	 **/
-	public function viewFile()
-	{
-
+	public function viewFile() {
+		$this->load->language($this->_module_route);
+		
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		if ($this->user->hasPermission('modify', $this->_module_route)) {
@@ -660,7 +442,6 @@ class ControllerModuleFsMonitor extends Controller
 
 			if (empty($data['content'])) {
 				$this->session->data['error'] = $this->language->get('error_permission');
-
 				$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
 			}
 
@@ -694,10 +475,8 @@ class ControllerModuleFsMonitor extends Controller
 			$data['heading_title'] = $file_name;
 
 			$this->response->setOutput($this->load->view($this->_module_route . '/view_file', $data));
-
 		} else {
 			$this->session->data['error'] = $this->language->get('error_permission');
-
 			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
 		}
 	}
@@ -706,11 +485,13 @@ class ControllerModuleFsMonitor extends Controller
 	 * widget section
 	 * @return string controller output
 	 **/
-	public function widget()
-	{
-		
+	public function widget() {
+		$this->load->model($this->_module_route);
+
 		$data = $this->language->load($this->_module_route);
 		$data += $this->language->load($this->_dashboard_route);
+
+		$this->humanizer = new Security\humanizer($this->registry);
 
 		$data['user_token'] = $this->session->data['user_token'];
 
@@ -721,7 +502,7 @@ class ControllerModuleFsMonitor extends Controller
 
 		if ($scan) {
 			unset($data['scan_data']);
-			
+
 			$date_key = $this->language->get('text_scans_on') . date_format(date_create($scan['date_added']), $this->language->get('text_date_format_short'));
 
 			$scan['scan_size_abs_humanized'] = $this->humanizer->humanBytes($scan['scan_size_abs']);
@@ -742,14 +523,190 @@ class ControllerModuleFsMonitor extends Controller
 	 * ajax reload widget
 	 * @return string output of widget function
 	 **/
-	public function reloadWidget()
-	{
-		if ($this->validateScan()) {
-		
-			$scan_id = $this->createScan($this->language->get('text_dashboard_scan'));
-			$this->response->setOutput($this->widget());
+	public function reloadWidget() {
+		$this->language->load($this->_module_route);
 
+		if ($this->validateScan()) {
+			$this->createScan($this->language->get('text_dashboard_scan'));
+			$this->response->setOutput($this->widget());
 		}
 	}
 
+	/**
+	 * rename scan
+	 * @return void
+	 **/
+	public function rename() {
+		$this->load->model($this->_module_route);
+		$this->language->load($this->_module_route);
+
+		if ($this->user->hasPermission('modify', $this->_module_route)) {
+			if (isset($this->request->post['scan_name']) && !empty($this->request->post['scan_name'])) {
+				$scan_name = $this->request->post['scan_name'];
+				$this->{$this->_model}->rename((int)$this->request->get['scan_id'], $scan_name);
+
+				$this->session->data['success'] = $this->language->get('text_success_renamed');
+				$this->response->redirect($this->url->link($this->_module_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&user_token=' . $this->session->data['user_token'], true));
+			} else {
+				$this->session->data['error'] = $this->language->get('error_empty_name');
+				$this->response->redirect($this->url->link($this->_module_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&user_token=' . $this->session->data['user_token'], true));
+			}
+
+		} else {
+			$this->session->data['error'] = $this->language->get('error_permission');
+			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
+		}
+	}
+
+	/**
+	 * delete scan
+	 * @return void
+	 **/
+	public function delete() {
+		$this->load->model($this->_module_route);
+		$this->language->load($this->_module_route);
+
+		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->request->post['scans'] && $this->user->hasPermission('modify', $this->_module_route)) {
+			foreach ($this->request->post['scans'] as $scan_id) {
+				$this->{$this->_model}->deleteScan((int) $scan_id);
+			}
+
+			$this->session->data['success'] = $this->language->get('text_success_scans_deleted');
+			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
+		} else {
+			$this->session->data['error'] = $this->language->get('error_permission');
+			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
+		}
+
+	}
+
+	/**
+	 * create scan
+	 * @param 	string 	$name
+	 * @return 	int 	scan_id
+	 **/
+	private function createScan($name) {
+		$this->load->model($this->_module_route);
+
+		$this->directory_scanner = new Security\directory_scanner();
+		$this->fs_scans = new Security\fs_scans();
+		
+		// add include paths
+		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
+		$include_paths[] = $this->config->get('security_fs_base_path');
+		$this->directory_scanner->setIncludePaths($include_paths);
+		
+		// add exclude paths
+		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
+		$this->directory_scanner->setExcludePaths($exclude_paths);
+		
+		// add default replace path
+		$this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
+		
+		// add extensions
+		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
+
+		$files = $this->directory_scanner->getFiles();
+		$scan_size = $this->fs_scans->getScanSize($files);
+		$scan_id = $this->{$this->_model}->addScan($name, $files, $scan_size);
+
+		return $scan_id;
+	}
+
+	/**
+	 * generate default settings for module
+	 * @return void
+	 **/
+	public function generateDefaultSettings() {
+		$this->load->model($this->_module_route);
+		$this->language->load($this->_module_route);
+
+		if ($this->user->hasPermission('modify', $this->_module_route)) {
+			$this->{$this->_model}->install(true);
+
+			$this->session->data['success'] = $this->language->get('text_success_saved');
+			$this->response->redirect($this->url->link($this->_module_route . '/settings', 'user_token=' . $this->session->data['user_token'], true));
+		} else {
+			$this->session->data['error'] = $this->language->get('error_permission');
+			$this->response->redirect($this->url->link($this->_module_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
+		}
+	}
+
+	/**
+	 * validate scan before create
+	 * @return bool
+	 **/
+	private function validateScan() {
+		if (!$this->user->hasPermission('modify', $this->_module_route)) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		if (!$this->error) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * validate settings form data
+	 * @return bool
+	 **/
+	private function validateSettings() {
+		if (!$this->user->hasPermission('modify', $this->_module_route)) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		if (empty($this->request->post['security_fs_base_path'])) {
+			$this->error['base_path'] = $this->language->get('error_base_path');
+		}
+
+		if (empty($this->request->post['security_fs_extensions'])) {
+			$this->error['extensions'] = $this->language->get('error_extensions');
+		}
+
+		if (empty($this->request->post['security_fs_cron_access_key'])) {
+			$this->error['access_key'] = $this->language->get('error_cron_access_key');
+		}
+
+		if (!$this->error) {
+			return true;
+		} else {
+			if (!isset($this->error['warning'])) {
+				$this->error['warning'] = $this->language->get('error_form');
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * format file_data for output
+	 * @param 	string 	$file_name
+	 * @param 	array 	$file_data
+	 * @return 	array
+	 **/
+	private function formatFile($file_name, $file_data) {
+		if (isset($file_data['diff'])) { //changed
+			return [
+				'filesize' => $this->humanizer->humanBytes($file_data['new']['filesize']) . $file_data['postfix'],
+				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
+				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
+				'filemtime' => date('d.m.Y H:i:s',$file_data['new']['filemtime']),
+				'filectime' => date('d.m.Y H:i:s',$file_data['new']['filectime']),
+				'fileperms' => substr(decoct($file_data['new']['fileperms']), -4),
+				'crc' => $file_data['new']['crc'],
+				'diff' => $file_data['diff']
+			];
+		} else {
+			return [
+				'filesize' => $this->humanizer->humanBytes($file_data['filesize']),
+				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
+				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
+				'filemtime' => date('d.m.Y H:i:s',$file_data['filemtime']),
+				'filectime' => date('d.m.Y H:i:s',$file_data['filectime']),
+				'fileperms' => substr(decoct($file_data['fileperms']), -4),
+				'crc' => $file_data['crc']
+			];
+		}
+	}
 }
