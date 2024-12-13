@@ -3,29 +3,23 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-class ControllerExtensionModuleFsMonitor extends ControllerModuleFsMonitor {}
+class ControllerModuleFsMonitor extends Controller {
 
-class ControllerModuleFsMonitor extends Controller
-{
-	public 	$_version 				= '1.1.2';
-	private $_module_route 			= 'extension/module/fs_monitor';
-	private $_model 				= 'model_extension_module_fs_monitor';
-	
+	public 	$_version 				= '1.2';
+	private $_module_route 			= 'module/fs_monitor';
+	private $_model 				= 'model_module_fs_monitor';
+
 	/**
-	 * constructor
-	 * @param 	object $registry
-	 * @return 	void
+	 * run cron scan
+	 * @return void
 	 **/
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
-
-		$this->load->language($this->_module_route);
+	public function index() {
 		$this->load->model($this->_module_route);
-
-		$this->humanizer = new Security\humanizer($registry);
-		$this->directory_scanner = new Security\directory_scanner($registry);
-		$this->fs_scans = new Security\fs_scans($registry);
+		$this->load->language($this->_module_route);
+		
+		$this->humanizer = new Security\humanizer($this->registry);
+		$this->directory_scanner = new Security\directory_scanner();
+		$this->fs_scans = new Security\fs_scans();
 
 		// add include paths
 		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
@@ -41,14 +35,7 @@ class ControllerModuleFsMonitor extends Controller
 		
 		// add extensions
 		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
-	}
 
-	/**
-	 * run cron scan
-	 * @return void
-	 **/
-	public function index()
-	{
 		// check access_key
 		if (isset($this->request->get['access_key']) && $this->request->get['access_key'] == $this->config->get('security_fs_cron_access_key')) {
 
@@ -61,33 +48,32 @@ class ControllerModuleFsMonitor extends Controller
 			$scan_size = $this->fs_scans->getScanSize($files);
 
 			// Compare scans
-			$current_scan = array(
+			$current_scan = [
 				'scan_id' => 0,
 				'scan_size' => (int) $scan_size,
 				'user_name' => $this->language->get('text_cron_scan_user'),
 				'name' => $this->language->get('text_cron_scan_name'),
 				'date_added' => date('Y-m-d H:i:s'),
-				'scan_data' => array(
+				'scan_data' => [
 					'scanned' => $files
-				)
-			);
+				]
+			];
 
-			$scansDiff = $this->fs_scans->getScansDiff(array(
+			$scansDiff = $this->fs_scans->getScansDiff([
 				$current_scan,
 				$last_scan
-			));
+			]);
 
 			$scan = $scansDiff[0];
 			// End compare scans
 
 			// notify administrator
 			if ($scan['new_count'] || $scan['changed_count'] || $scan['deleted_count']) {
-
 				// add scan
 				if ($this->config->get('security_fs_cron_save')) {
 					$scan_name = $this->language->get('text_cron_scan_name');
 					$user_name = $this->language->get('text_cron_scan_user');
-					$scan_id = $this->{$this->_model}->addScan($scan_name, $files, $scan_size, $user_name);
+					$this->{$this->_model}->addScan($scan_name, $files, $scan_size, $user_name);
 					$scan = $this->{$this->_model}->getLastScan();
 				}
 
@@ -144,16 +130,11 @@ class ControllerModuleFsMonitor extends Controller
 	 * @param 	string 	$name
 	 * @return 	int 	scan_id
 	 **/
-	private function addScan($name)
-	{
+	private function addScan($name) {
 		$files = $this->directory_scanner->getFiles();
-
 		$scan_size = $this->fs_scans->getScanSize($files);
-		
 		$user_name = $this->language->get('text_cron_scan_user');
-		
 		$scan_id = $this->{$this->_model}->addScan($name, $files, $scan_size, $user_name);
-
 		return $scan_id;
 	}
 

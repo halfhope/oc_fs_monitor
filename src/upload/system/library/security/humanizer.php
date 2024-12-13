@@ -3,22 +3,20 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 namespace Security;
-class Humanizer
-{
+class Humanizer {
+	private $language;
 
-	function __construct($registry)
-	{
+	function __construct($registry) {
 		$this->language = $registry->get('language');
 	}
 
-	public function humanDateDifference($date_start, $date_end)
-	{
+	public function humanDateDifference($date_start, $date_end) {
 		$date_start = date_create($date_start);
 		$datetime2  = date_create($date_end);
 
 		$interval = date_diff($date_start, $datetime2);
 
-		$result = array();
+		$result = [];
 
 		if ($interval->d) {
 			$result[] = $interval->format("%d " . $this->language->get('text_interval_days'));
@@ -37,9 +35,8 @@ class Humanizer
 		return "<acronym title='$date'>" . implode(' ', $result) . "</acronym>";
 	}
 
-	public function humanBytes($size)
-	{
-		$filesizename = array(
+	public function humanBytes($size) {
+		$filesizename = [
 			" B",
 			" KB",
 			" MB",
@@ -49,13 +46,12 @@ class Humanizer
 			" EB",
 			" ZB",
 			" YB"
-		);
+		];
 		$size = abs($size);
 		return $size ? round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . $filesizename[$i] : '0 Bytes';
 	}
 
-	public function humanDatePrecise($date, $format = 'Y-m-d H:i:s')
-	{
+	public function humanDatePrecise($date, $format = 'Y-m-d H:i:s') {
 		$r = false;
 		$a = preg_split("/[:\.\s-]+/", $date);
 		$d = time() - strtotime($date);
