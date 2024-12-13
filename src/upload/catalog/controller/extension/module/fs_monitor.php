@@ -91,34 +91,73 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 				}
 
 				if (!empty($message)) {
+					$security_fs_notify_to = $this->config->get('security_fs_notify_to');
+
 					$datetime_format = ($this->language->get('datetime_format') == 'datetime_format') ? $this->language->get('date_format_short') : $this->language->get('datetime_format');
-					$message = sprintf($this->language->get('text_mail_header'), date($datetime_format, time())) . PHP_EOL . $message;
+					$message = sprintf($this->language->get('text_mail_header'), date($datetime_format, time())) . PHP_EOL . PHP_EOL . $message;
+					
 					if ($this->config->get('security_fs_cron_notify')) {
 
 						if ($this->config->get('security_fs_cron_save')) {
 							$link = HTTP_SERVER . $this->config->get('security_fs_admin_dir') .'/index.php?route=' . $this->_route . '/viewScan&scan_id=' . $scan['scan_id'];
-							$message .= $this->language->get('text_mail_link') . '<a href="' . $link . '">' . $link . '</a>';
+
+							if ($security_fs_notify_to !== 'mail') {
+								$message .= PHP_EOL . $this->language->get('text_mail_link') . $link;
+							} else {
+								$message .= PHP_EOL . $this->language->get('text_mail_link') . '<a href="' . $link . '">' . $link . '</a>';
+							}
+						}
+					
+						switch ($this->config->get('security_fs_notify_to')) {
+							case 'email':
+								$this->load->library('security/notify/email');
+								$this->notify_email = new Security\Notify\Email();
+								
+								$mail = new Mail();
+
+								$this->notify_email->send($mail, [
+									'config_mail_protocol' 		=> $this->config->get('config_mail_protocol'),
+									'config_mail_parameter' 	=> $this->config->get('config_mail_parameter'),
+									'config_mail_smtp_hostname' => $this->config->get('config_mail_smtp_hostname'),
+									'config_mail_smtp_username' => $this->config->get('config_mail_smtp_username'),
+									'config_mail_smtp_password' => $this->config->get('config_mail_smtp_password'),
+									'config_mail_smtp_port' 	=> $this->config->get('config_mail_smtp_port'),
+									'config_mail_smtp_timeout' 	=> $this->config->get('config_mail_smtp_timeout'),
+									'security_fs_e_emails' 		=> $this->config->get('security_fs_e_emails'),
+									'config_email' 				=> $this->config->get('config_email'),
+									'config_name' 				=> $this->config->get('config_name'),
+									'text_mail_subject' 		=> $this->language->get('text_mail_subject'),
+									'message' 					=> $message,
+								]);
+						
+								break;
+							case 'whatsapp':
+
+								$this->load->library('security/notify/whatsapp');
+								$this->notify_whatsapp = new Security\Notify\WhatsApp();
+
+								$this->notify_whatsapp->send([
+									'security_fs_w_phone_number' 		=> $this->config->get('security_fs_w_phone_number'),
+									'security_fs_w_business_account_id' => $this->config->get('security_fs_w_business_account_id'),
+									'security_fs_w_api_token' 			=> $this->config->get('security_fs_w_api_token'),
+									'message' 							=> $message
+								]);
+
+								break;
+							case 'telegram':
+
+								$this->load->library('security/notify/telegram');
+								$this->notify_telegram = new Security\Notify\Telegram();
+
+								$this->notify_telegram->send([
+									'security_fs_t_api_token'	=> $this->config->get('security_fs_t_api_token'),
+									'security_fs_t_channel_id'	=> $this->config->get('security_fs_t_channel_id'),
+									'message' 					=> $message
+								]);
+
+								break;
 						}
 
-						$mail                = new Mail();
-						$mail->protocol      = $this->config->get('config_mail_protocol');
-						$mail->parameter     = $this->config->get('config_mail_parameter');
-						$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-						$mail->smtp_username = $this->config->get('config_mail_smtp_username');
-						$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-						$mail->smtp_port     = $this->config->get('config_mail_smtp_port');
-						$mail->smtp_timeout  = $this->config->get('config_mail_smtp_timeout');
-
-						$emails = $this->config->get('security_fs_emails');
-						foreach (explode(',', $emails) as $email) {
-							$mail->setTo(trim($email));
-							$mail->setFrom($this->config->get('config_email'));
-							$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
-							$mail->setSubject(html_entity_decode($this->language->get('text_mail_subject'), ENT_QUOTES, 'UTF-8'));
-							$mail->setHtml(nl2br($message));
-							$mail->setText(strip_tags($message));
-							$mail->send();
-						}
 					}
 				}
 			}
