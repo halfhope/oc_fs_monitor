@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>FSMonitor - filesystem monitoring</id>
+	<version>1.2.1</version>
+	<vqmver required="false">1.1</vqmver>
+	<author>https://shtt.blog/</author>
+	
+	<file path="admin/controller/common/home.php">
+		<operation error="skip">
+			<search><![CDATA['common/header',]]></search>
+			<add position="after"><![CDATA['module/fs_monitor/widget',]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/view/template/common/home.tpl">
+		<operation error="skip">
+			<search><![CDATA[<div class="latest">]]></search>
+			<add position="before"><![CDATA[<?php echo $widget ?>]]></add>
+		</operation>
+	</file>
+
+</modification>
