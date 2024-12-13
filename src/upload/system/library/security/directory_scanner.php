@@ -6,6 +6,7 @@ namespace Security;
 final class Directory_scanner
 {
     private static $extensions = array('php');
+    private static $exclude_files = array();
     private static $exclude_paths = array();
     private static $include_paths = array();
     private static $files = array();
@@ -51,6 +52,15 @@ final class Directory_scanner
             }
         }
     }
+    public function getReplacePath()
+    {
+        return self::$replace_path;
+    }
+
+    public function setReplacePath($replace_path)
+    {
+        self::$replace_path = $replace_path;
+    }
 
     public function getExcludePaths()
     {
@@ -74,10 +84,15 @@ final class Directory_scanner
         $files = array();
         foreach (self::$files as $path => $file_list) {
             foreach ($file_list as $file_name => $file_data) {
-                if (!self::in_array_beginning_with($file_list->getPath(), self::$exclude_paths)) {
-                    $short_file_name         = str_replace(self::$replace_path, '', realpath($file_name));
-                    $files[$short_file_name] = self::getFileInfo($file_name);
+                
+                $in_excluded_dirs = self::in_array_beginning_with($file_list->getPath(), self::getExcludePaths());
+                $in_excluded_files = self::fnmatch_exclude($file_name, self::getExcludePaths(), self::getReplacePath());
+
+                if (!$in_excluded_dirs && !$in_excluded_files) {
+                    $file_name         = realpath($file_name);
+                    $files[$file_name] = self::getFileInfo($file_name);
                 }
+
             }
         }
 
@@ -126,6 +141,16 @@ final class Directory_scanner
     {
         foreach ($array as $begin) {
             if (strncmp($path, $begin, strlen($begin)) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static function fnmatch_exclude($path, $array, $replace)
+    {
+        foreach ($array as $pattern) {
+            if (fnmatch($pattern, str_replace($replace, '', realpath($path)), FNM_PATHNAME | FNM_NOESCAPE)) {
                 return true;
             }
         }

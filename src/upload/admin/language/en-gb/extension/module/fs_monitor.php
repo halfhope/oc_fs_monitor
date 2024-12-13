@@ -38,6 +38,8 @@ $_['text_label_new']             = 'New';
 $_['text_label_changed']         = 'Changed';
 $_['text_label_deleted']         = 'Deleted';
 $_['text_view']                  = 'View scan';
+$_['text_view_all']              = 'View all';
+$_['text_dashboard_scan']        = 'Dashboard';
 $_['text_initial_scan']          = 'Initial';
 $_['text_date_format_short']     = 'F j';
 

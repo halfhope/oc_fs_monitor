@@ -29,38 +29,13 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
         // add exclude paths
         $exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
         $this->directory_scanner->setExcludePaths($exclude_paths);
+        
+        // add default replace path
+        $this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
 
         // add extensions
         $this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
 
-    }
-
-
-    public function registerCron()
-    {
-        $this->load->model('setting/cron');
-        
-        $json = array();
-        
-        $cycle = $this->request->post['cycle'];
-        
-        $data['powered'] = sprintf($this->language->get('text_powered'), $this->config->get('config_name'), date('Y', time()));
-        
-        $cron_link = $this->url->link('marketplace/cron', 'user_token=' . $this->session->data['user_token'], 'SSL');
-
-        if ($this->user->hasPermission('modify', 'extension/module/fs_monitor')) {
-            $cron_scan = $this->model_setting_cron->getCronByCode('fs_monitor');
-            if (!empty($cron_scan)) {
-                $json['error'] = sprintf($this->language->get('error_cron_job_installed'), $cron_link);
-            }else{
-                $cron_scan = $this->model_setting_cron->addCron('fs_monitor', $cycle, 'extension/module/fs_monitor/cron', true);
-                if ($cron_scan) {
-                    $json['success'] = sprintf($this->language->get('success_cron_job_installed'), $cron_link);
-                }
-            }
-        }
-        $this->response->addHeader('Content-Type: application/json');
-        $this->response->setOutput(json_encode($json));
     }
 
     public function install(){
@@ -139,16 +114,17 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
         } else {
             $page = 1;
         }
-
+        
+        $admin_limit = !empty($this->config->get('config_admin_limit')) ? $this->config->get('config_admin_limit') : 20;
         $data = array(
-            'start'           => ($page - 1) * $this->config->get('config_admin_limit'),
-            'limit'           => $this->config->get('config_admin_limit')
+            'start'           => ($page - 1) * $admin_limit,
+            'limit'           => $admin_limit
         );
 
         $pagination = new Pagination();
         $pagination->total = $this->model_extension_module_fs_monitor->getTotalScans();
         $pagination->page = $page;
-        $pagination->limit = $this->config->get('config_admin_limit');
+        $pagination->limit = $admin_limit;
         $pagination->text = $this->language->get('text_pagination');
         $pagination->url = $this->url->link('extension/module/fs_monitor', 'user_token=' . $this->session->data['user_token'] . '&page={page}', 'SSL');
 
@@ -210,7 +186,7 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             'common/footer'
         );
 
-        $this->response->setOutput($this->compatibleRender('extension/module/fs_monitor', $this->template_data, $child, true));
+        $this->response->setOutput($this->compatibleRender('security/fs_monitor', $this->template_data, $child, true));
     }
 
     public function view()
@@ -381,7 +357,7 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             'common/footer'
         );
 
-        $this->response->setOutput($this->compatibleRender('extension/module/fs_monitor_view_scan', $this->template_data, $child, true));
+        $this->response->setOutput($this->compatibleRender('security/fs_monitor_view_scan', $this->template_data, $child, true));
     }
 
     public function settings()
@@ -396,7 +372,7 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
 
             $this->session->data['success'] = $this->language->get('text_success_saved');
 
-            $this->compatibleRedirect($this->url->link('extension/module/fs_monitor/settings', 'user_token=' . $this->session->data['user_token'], true));
+            $this->compatibleRedirect($this->url->link('security/fs_monitor/settings', 'user_token=' . $this->session->data['user_token'], true));
         }
 
         $this->template_data['heading_title'] = $this->language->get('heading_title');
@@ -407,13 +383,22 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
         $this->template_data['button_settings'] = $this->language->get('button_settings');
         $this->template_data['button_generate'] = $this->language->get('button_generate');
 
-        // OpenCart cron jobs section
-        $this->template_data['entry_cron_jobs']         = $this->language->get('entry_cron_jobs');
-        $this->template_data['button_add_task']         = $this->language->get('button_add_task');
-        $this->template_data['text_cron_interval_hour'] = $this->language->get('text_cron_interval_hour');
-        $this->template_data['text_cron_interval_day']  = $this->language->get('text_cron_interval_day');
-        $this->template_data['text_cron_interval_month']  = $this->language->get('text_cron_interval_month');
-        
+        $this->template_data['text_legend_module'] = $this->language->get('text_legend_module');
+        $this->template_data['text_legend_scanner'] = $this->language->get('text_legend_scanner');
+        $this->template_data['text_legend_cron']    = $this->language->get('text_legend_cron');
+
+        // Entry
+        $this->template_data['entry_admin_dir']       		= $this->language->get('entry_admin_dir');
+        $this->template_data['entry_base_path']       		= $this->language->get('entry_base_path');
+        $this->template_data['entry_extensions']      		= $this->language->get('entry_extensions');
+        $this->template_data['entry_extensions_help'] 		= $this->language->get('entry_extensions_help');
+        $this->template_data['entry_include']         		= $this->language->get('entry_include');
+        $this->template_data['entry_include_help']    		= $this->language->get('entry_include_help');
+        $this->template_data['entry_include_help_block']   	= sprintf($this->language->get('entry_include_help_block'), realpath(DIR_APPLICATION . '../../') . DIRECTORY_SEPARATOR . 'other_site.com' . DIRECTORY_SEPARATOR);
+        $this->template_data['entry_exclude']         		= $this->language->get('entry_exclude');
+        $this->template_data['entry_exclude_help']    		= $this->language->get('entry_exclude_help');
+        $this->template_data['entry_exclude_help_block']    = $this->language->get('entry_exclude_help_block');
+
         $this->template_data['entry_cron_access_key']  = $this->language->get('entry_cron_access_key');
         $this->template_data['entry_cron_wget']        = $this->language->get('entry_cron_wget');
         $this->template_data['entry_cron_curl']        = $this->language->get('entry_cron_curl');
@@ -422,20 +407,6 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
         $this->template_data['entry_cron_save_help']   = $this->language->get('entry_cron_save_help');
         $this->template_data['entry_cron_notify']      = $this->language->get('entry_cron_notify');
         $this->template_data['entry_cron_notify_help'] = $this->language->get('entry_cron_notify_help');
-
-        // Legend
-        $this->template_data['text_legend_module']          = $this->language->get('text_legend_module');
-        $this->template_data['text_legend_scanner']         = $this->language->get('text_legend_scanner');
-        $this->template_data['text_legend_cron_opencart']   = $this->language->get('text_legend_cron_opencart');
-
-        // Entry
-        $this->template_data['entry_admin_dir']       = $this->language->get('entry_admin_dir');
-        $this->template_data['entry_base_path']       = $this->language->get('entry_base_path');
-        $this->template_data['entry_extensions']      = $this->language->get('entry_extensions');
-        $this->template_data['entry_extensions_help'] = $this->language->get('entry_extensions_help');
-        $this->template_data['entry_include']         = $this->language->get('entry_include');
-        $this->template_data['entry_exclude']         = $this->language->get('entry_exclude');
-
 
         $this->template_data['text_label_scanned'] = $this->language->get('text_label_scanned');
         $this->template_data['text_label_new']     = $this->language->get('text_label_new');
@@ -519,7 +490,16 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             $this->template_data['security_fs_exclude'] = $this->config->get('security_fs_exclude');
         }
 
-        // Cron
+        if (isset($this->request->post['security_fs_cron_access_key'])) {
+            $this->template_data['security_fs_cron_access_key'] = $this->request->post['security_fs_cron_access_key'];
+        } else {
+            $this->template_data['security_fs_cron_access_key'] = $this->config->get('security_fs_cron_access_key');
+        }
+
+        $this->template_data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- ' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=security/fs_monitor_cron&access_key=';
+        $this->template_data['security_fs_cron_curl'] = '/usr/local/bin/curl -s ' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=security/fs_monitor_cron&access_key=';
+        $this->template_data['security_fs_cron_cli']  = '/usr/local/bin/php -q ' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', DIR_APPLICATION) . 'index.php?route=security/fs_monitor_cron&access_key=';
+
         if (isset($this->request->post['security_fs_cron_save'])) {
             $this->template_data['security_fs_cron_save'] = $this->request->post['security_fs_cron_save'];
         } else {
@@ -582,7 +562,7 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             'common/footer'
         );
 
-        $this->response->setOutput($this->compatibleRender('extension/module/fs_monitor_settings', $this->template_data, $child, true));
+        $this->response->setOutput($this->compatibleRender('security/fs_monitor_settings', $this->template_data, $child, true));
 
     }
 
@@ -599,6 +579,56 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             $this->session->data['error'] = $this->language->get('error_permission');
 
             $this->compatibleRedirect($this->url->link('extension/module/fs_monitor', 'user_token=' . $this->session->data['user_token'], 'SSL'));
+        }
+    }
+
+    public function widget() {
+        
+        $data['user_token'] = $this->session->data['user_token'];
+        
+        $this->template_data['heading_title'] = $this->language->get('text_fs_monitor');
+
+        $this->template_data['text_view_all'] = $this->language->get('text_view_all');
+
+        $this->template_data['text_label_scanned'] = $this->language->get('text_label_scanned');
+        $this->template_data['text_label_new'] = $this->language->get('text_label_new');
+        $this->template_data['text_label_changed'] = $this->language->get('text_label_changed');
+        $this->template_data['text_label_deleted'] = $this->language->get('text_label_deleted');
+        
+        $this->template_data['text_dashboard_scan'] = $this->language->get('text_dashboard_scan');
+
+        $this->template_data['button_view'] = $this->language->get('button_view');
+        $this->template_data['button_add'] = $this->language->get('button_add');
+        $this->template_data['button_scan_loading'] = $this->language->get('button_scan_loading');
+
+        $this->template_data['reload_widget'] = html_entity_decode($this->url->link('extension/module/fs_monitor/reloadWidget', 'user_token=' . $this->session->data['user_token'], 'SSL'), ENT_QUOTES, 'UTF-8');
+        $this->template_data['view_all'] = $this->url->link('extension/module/fs_monitor', 'user_token=' . $this->session->data['user_token'], 'SSL');
+
+        $scan = $this->model_extension_module_fs_monitor->getLastScan();
+
+        if ($scan) {
+            $date_key = $this->language->get('text_scans_on') . date_format(date_create($scan['date_added']), $this->language->get('text_date_format_short'));
+
+            $scan['scan_size_abs_humanized'] = $this->humanizer->humanBytes($scan['scan_size_abs']);
+            $scan['scan_size_rel_humanized'] = $this->humanizer->humanBytes($scan['scan_size_rel']);
+
+            $this->template_data['scan']                   = $scan;
+            $this->template_data['scan']['date_added_ago'] = $this->humanizer->humanDatePrecise($this->template_data['scan']['date_added'], 'H:i:s');
+            $this->template_data['scan']['href']           = $this->url->link('extension/module/fs_monitor/view', 'scan_id=' . $this->template_data['scan']['scan_id'] . '&user_token=' . $this->session->data['user_token'], 'SSL');
+            $this->template_data['scan']['date_key']       = $date_key;
+
+            return $this->compatibleRender('security/fs_monitor_widget', $this->template_data, array(), true);
+        }else{
+            return;
+        }
+    }
+
+    public function reloadWidget(){
+        if ($this->validateScan()) {
+        
+            $scan_id = $this->addScan($this->language->get('text_dashboard_scan'));
+            $this->response->setOutput($this->widget());
+        
         }
     }
 
@@ -627,99 +657,6 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
             $this->session->data['error'] = $this->language->get('error_permission');
 
             $this->compatibleRedirect($this->url->link('extension/module/fs_monitor', 'user_token=' . $this->session->data['user_token'], 'SSL'));
-        }
-    }
-
-    public function cron()
-    {
- 
-        $scans = $this->model_extension_module_fs_monitor->getScans();
-
-        if (!$scans) {
-
-            $this->addScan($this->language->get('text_initial_scan'));
-
-        }
-
-        $last_scan = $this->model_extension_module_fs_monitor->getLastScan();
-
-        $files = $this->directory_scanner->getFiles();
-
-        $scan_size = $this->fs_scans->getScanSize($files);
-
-        // Compare scans
-        $current_scan = array(
-            'scan_id' => 0,
-            'scan_size' => (int) $scan_size,
-            'user_name' => $this->language->get('text_cron_scan_user'),
-            'name' => $this->language->get('text_cron_scan_name'),
-            'date_added' => date('Y-m-d H:i:s'),
-            'scan_data' => array(
-                'scanned' => $files
-            )
-        );
-
-        $scansDiff = $this->fs_scans->getScansDiff(array(
-            $current_scan,
-            $last_scan
-        ));
-
-        $scan = $scansDiff[0];
-        // End compare scans
-
-        // notify administrator
-        if ($scan['new_count'] || $scan['changed_count'] || $scan['deleted_count']) {
-
-            // add scan
-            if ($this->config->get('security_fs_cron_save')) {
-
-                $scan_id = $this->model_extension_module_fs_monitor->addScan($this->language->get('text_cron_scan_name'), $files, $scan_size, $this->language->get('text_cron_scan_user'));
-                $scan = $this->model_extension_module_fs_monitor->getLastScan();
-
-            }
-
-            $message = '';
-
-            if ($scan['new_count']) {
-                $message .= sprintf('%d ' . $this->language->get('text_mail_new_files') . PHP_EOL, $scan['new_count']);
-            }
-
-            if ($scan['changed_count']) {
-                $message .= sprintf('%d ' . $this->language->get('text_mail_changed_files') . PHP_EOL, $scan['changed_count']);
-            }
-
-            if ($scan['deleted_count']) {
-                $message .= sprintf('%d ' . $this->language->get('text_mail_deleted_files') . PHP_EOL, $scan['deleted_count']);
-            }
-
-            if (!empty($message)) {
-                $datetime_format = ($this->language->get('datetime_format') == 'datetime_format') ? $this->language->get('date_format_short') : $this->language->get('datetime_format');
-                $message = sprintf($this->language->get('text_mail_header'), date($datetime_format, time())) . PHP_EOL . $message;
-                if ($this->config->get('security_fs_cron_notify')) {
-
-                    if ($this->config->get('security_fs_cron_save')) {
-                        $link = HTTP_SERVER . $this->config->get('security_fs_admin_dir') .'/index.php?route=extension/module/fs_monitor/view&scan_id=' . $scan['scan_id'];
-                        $message .= $this->language->get('text_mail_link') . '<a href="' . $link . '">' . $link . '</a>';
-                    }
-
-                    $mail                = new Mail();
-                    $mail->protocol      = $this->config->get('config_mail_protocol');
-                    $mail->parameter     = $this->config->get('config_mail_parameter');
-                    $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-                    $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-                    $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-                    $mail->smtp_port     = $this->config->get('config_mail_smtp_port');
-                    $mail->smtp_timeout  = $this->config->get('config_mail_smtp_timeout');
-
-                    $mail->setTo($this->config->get('config_email'));
-                    $mail->setFrom($this->config->get('config_email'));
-                    $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
-                    $mail->setSubject(html_entity_decode($this->language->get('text_mail_subject'), ENT_QUOTES, 'UTF-8'));
-                    $mail->setHtml(nl2br($message));
-                    $mail->setText(strip_tags($message));
-                    $mail->send();
-                }
-            }
         }
     }
 
@@ -781,7 +718,7 @@ class ControllerExtensionModuleFsMonitor extends CompatibleController
                 'common/footer'
             );
 
-            $this->response->setOutput($this->compatibleRender('extension/module/fs_monitor_view_file', $this->template_data, $child, true));
+            $this->response->setOutput($this->compatibleRender('security/fs_monitor_view_file', $this->template_data, $child, true));
 
         } else {
             $this->session->data['error'] = $this->language->get('error_permission');

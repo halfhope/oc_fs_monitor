@@ -75,10 +75,10 @@ class ModelExtensionModuleFSMonitor extends Model
 
     public function getLastScan()
     {
-        $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id ORDER BY sfmd.scan_id DESC LIMIT 0,1");
-        $result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
+        $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg ORDER BY sfmg.scan_id DESC LIMIT 0,1");
         return $result->row;
     }
+
 
     public function getScan($scan_id, $full = false)
     {

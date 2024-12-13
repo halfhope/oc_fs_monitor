@@ -38,6 +38,8 @@ $_['text_label_new']             = 'Новые';
 $_['text_label_changed']         = 'Изменены';
 $_['text_label_deleted']         = 'Удалены';
 $_['text_view']                  = 'Просмотр сканирования';
+$_['text_view_all']              = 'Смотреть все';
+$_['text_dashboard_scan']        = 'Панель управления';
 $_['text_initial_scan']          = 'Первичное';
 $_['text_date_format_short']     = 'd.m.Y';
 
