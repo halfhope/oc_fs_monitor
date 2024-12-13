@@ -5,6 +5,7 @@
 namespace Security;
 final class FS_scans
 {
+
     function __construct($registry)
     {
 

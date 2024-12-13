@@ -16,9 +16,9 @@ class ModelSecurityFSMonitor extends Model
     public function addScan($name, $files, $scan_size)
     {
 
-        $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor` (scan_size, user_name, name, date_added, scan_data) VALUES (" . (int) $scan_size . ",'" . $this->db->escape($this->user->getUserName()) . "','" . $this->db->escape($name) . "', NOW(), '" . $this->db->escape(json_encode(array(
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "security_filesystem_monitor` (scan_size, user_name, name, date_added, scan_data) VALUES (" . (int) $scan_size . ",'" . $this->db->escape($this->user->getUserName()) . "','" . $this->db->escape($name) . "', '" . date('Y-m-d H:i:s') . "', '" . $this->db->escape(base64_encode(gzdeflate(json_encode(array(
             'scanned' => $files
-        ))) . "');");
+        ))))) . "');");
 
         return $this->db->getLastId();
     }
@@ -27,11 +27,9 @@ class ModelSecurityFSMonitor extends Model
     {
         $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor` WHERE scan_id = " . (int) $scan_id);
 
-        $scan = $result->row;
+        $result->row['scan_data'] = json_decode(gzinflate(base64_decode($result->row['scan_data'])), true);
 
-        $scan['scan_data'] = json_decode($scan['scan_data'], true);
-
-        return $scan;
+        return $result->row;
     }
 
     public function deleteScan($scan_id)
@@ -47,7 +45,7 @@ class ModelSecurityFSMonitor extends Model
         $scans = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor` ORDER BY scan_id DESC");
 
         foreach ($scans->rows as $key => $scan) {
-            $scans->rows[$key]['scan_data'] = json_decode($scan['scan_data'], true);
+            $scans->rows[$key]['scan_data'] = json_decode(gzinflate(base64_decode($scan['scan_data'])), true);
         }
 
         return $scans->rows;
@@ -57,7 +55,7 @@ class ModelSecurityFSMonitor extends Model
     {
 
         foreach ($scans as $scan) {
-            $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor` SET `scan_data` = '" . $this->db->escape(json_encode($scan['scan_data'])) . "' WHERE `scan_id` = " . (int) $scan['scan_id']);
+            $this->db->query("UPDATE `" . DB_PREFIX . "security_filesystem_monitor` SET `scan_data` = '" . $this->db->escape(base64_encode(gzdeflate(json_encode($scan['scan_data'])))) . "' WHERE `scan_id` = " . (int) $scan['scan_id']);
         }
 
     }
@@ -121,13 +119,13 @@ class ModelSecurityFSMonitor extends Model
         }
 
         $security_fs_cron_save = $this->config->get('security_fs_cron_save');
-        if (empty($security_fs_cron_save) || $replace) {
+        if (is_null($security_fs_cron_save) || $replace) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_cron_save'");
             $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_cron_save', `value` = '0'");
         }
 
         $security_fs_cron_notify = $this->config->get('security_fs_cron_notify');
-        if (empty($security_fs_cron_notify) || $replace) {
+        if (is_null($security_fs_cron_notify) || $replace) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "setting WHERE `key` = 'security_fs_cron_notify'");
             $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '0', `code` = 'security_fs', `key` = 'security_fs_cron_notify', `value` = '1'");
         }
@@ -135,4 +133,5 @@ class ModelSecurityFSMonitor extends Model
     }
 
 }
+// change file test
 ?>

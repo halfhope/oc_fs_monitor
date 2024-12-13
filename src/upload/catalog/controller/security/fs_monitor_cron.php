@@ -10,9 +10,19 @@ class ControllerSecurityFsMonitorCron extends Controller
 
         $this->load->language('security/fs_monitor_cron');
 
-        $this->load->library('security/humanizer');
-        $this->load->library('security/directory_scanner');
-        $this->load->library('security/fs_scans');
+        if (version_compare('2.1', substr(VERSION, 0, 3)) == 0) {
+
+            $this->humanizer         = new Security\humanizer($registry);
+            $this->directory_scanner = new Security\directory_scanner($registry);
+            $this->fs_scans          = new Security\fs_scans($registry);
+
+        } else {
+
+            $this->load->library('security/humanizer');
+            $this->load->library('security/directory_scanner');
+            $this->load->library('security/fs_scans');
+
+        }
 
         $this->load->model('security/fs_monitor_cron');
 
@@ -51,15 +61,7 @@ class ControllerSecurityFsMonitorCron extends Controller
 
             $scan_size = $this->fs_scans->getScanSize($files);
 
-            if ($this->config->get('security_fs_cron_save')) {
-
-                $scan_id = $this->model_security_fs_monitor_cron->addScan($this->language->get('text_cron_scan_name'), $this->language->get('text_cron_scan_user'), $files, $scan_size);
-
-                $this->recalculateScansData();
-
-                $scan = $this->model_security_fs_monitor_cron->getLastScan();
-
-            } else {
+                // Compare scans
                 $current_scan = array(
                     'scan_id' => 0,
                     'scan_size' => (int) $scan_size,
@@ -77,10 +79,21 @@ class ControllerSecurityFsMonitorCron extends Controller
                 ));
 
                 $scan = $scansDiff[0];
-            }
+                // End compare scans
 
             // notify administrator
             if ($scan['scan_data']['new_count'] || $scan['scan_data']['changed_count'] || $scan['scan_data']['deleted_count']) {
+
+                // add scan
+                if ($this->config->get('security_fs_cron_save')) {
+
+                    $scan_id = $this->model_security_fs_monitor_cron->addScan($this->language->get('text_cron_scan_name'), $this->language->get('text_cron_scan_user'), $files, $scan_size);
+
+                    $this->recalculateScansData();
+
+                    $scan = $this->model_security_fs_monitor_cron->getLastScan();
+
+                }
 
                 $message = '';
 

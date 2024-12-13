@@ -55,7 +55,7 @@
 
                 <div class="changes-list col-sm-3 col-xs-6">
                   <?php if ($scan['scan_data']['scanned']): ?>
-                  <a href="<?php echo $scan['scanned'] ?>"><span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">  <div class="fa fa-file-o"></div> <?php echo $scan['scan_data']['scanned_count'] ?></span></a>
+                  <a href="<?php echo $scan['href'] ?>#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">  <div class="fa fa-file-o"></div> <?php echo $scan['scan_data']['scanned_count'] ?></span></a>
                   <?php endif ?>
 
                   <?php if ($scan['scan_data']['new']): ?>

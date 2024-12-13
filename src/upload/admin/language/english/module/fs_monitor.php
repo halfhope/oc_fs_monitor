@@ -4,6 +4,6 @@
  */
 
 // Heading
-$_['heading_title'] = 'File system monitoring';
+$_['heading_title'] = 'FSMonitor - file system monitoring';
 
 ?>

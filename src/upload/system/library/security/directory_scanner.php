@@ -11,7 +11,7 @@ final class Directory_scanner
     private static $files = array();
     private static $replace_path = '';
 
-    function __construct()
+    function __construct($registry)
     {
         // Increase execution time
         set_time_limit(0);
@@ -63,7 +63,7 @@ final class Directory_scanner
         foreach (self::$include_paths as $key => $path) {
             $directory = new \RecursiveDirectoryIterator($path);
 
-            self::$files[$path] = new \RecursiveIteratorIterator($directory);
+            self::$files[$path] = new \RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::LEAVES_ONLY, \RecursiveIteratorIterator::CATCH_GET_CHILD);
 
             $extensions = implode('|', self::$extensions);
 

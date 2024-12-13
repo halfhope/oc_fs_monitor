@@ -12,9 +12,19 @@ class ControllerSecurityFsMonitor extends Controller
 
         $this->load->language('security/fs_monitor');
 
-        $this->load->library('security/humanizer');
-        $this->load->library('security/directory_scanner');
-        $this->load->library('security/fs_scans');
+        if (version_compare('2.1', substr(VERSION, 0, 3)) == 0) {
+
+            $this->humanizer         = new Security\humanizer($registry);
+            $this->directory_scanner = new Security\directory_scanner($registry);
+            $this->fs_scans          = new Security\fs_scans($registry);
+
+        } else {
+
+            $this->load->library('security/humanizer');
+            $this->load->library('security/directory_scanner');
+            $this->load->library('security/fs_scans');
+
+        }
 
         $this->load->model('security/fs_monitor');
 
@@ -324,7 +334,7 @@ class ControllerSecurityFsMonitor extends Controller
         $data['entry_cron_access_key']  = $this->language->get('entry_cron_access_key');
         $data['entry_cron_wget']        = $this->language->get('entry_cron_wget');
         $data['entry_cron_curl']        = $this->language->get('entry_cron_curl');
-        $data['entry_cron_cli']        = $this->language->get('entry_cron_cli');
+        $data['entry_cron_cli']         = $this->language->get('entry_cron_cli');
         $data['entry_cron_save']        = $this->language->get('entry_cron_save');
         $data['entry_cron_save_help']   = $this->language->get('entry_cron_save_help');
         $data['entry_cron_notify']      = $this->language->get('entry_cron_notify');
@@ -412,9 +422,9 @@ class ControllerSecurityFsMonitor extends Controller
             $data['security_fs_cron_access_key'] = $this->config->get('security_fs_cron_access_key');
         }
 
-        $data['security_fs_cron_wget'] = '/usr/local/bin/wget -O - -q -t 1 ' . str_replace('admin/', '', HTTP_SERVER) . 'index.php?route=security/fs_monitor_cron&access_key=';
+        $data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- ' . str_replace('admin/', '', HTTP_SERVER) . 'index.php?route=security/fs_monitor_cron&access_key=';
         $data['security_fs_cron_curl'] = '/usr/local/bin/curl -s ' . str_replace('admin/', '', HTTP_SERVER) . 'index.php?route=security/fs_monitor_cron&access_key=';
-        $data['security_fs_cron_cli'] = '/usr/local/bin/php -q ' . DIR_APPLICATION . 'index.php?route=security/fs_monitor_cron&access_key=';
+        $data['security_fs_cron_cli']  = '/usr/local/bin/php -q ' . DIR_APPLICATION . 'index.php?route=security/fs_monitor_cron&access_key=';
 
         if (isset($this->request->post['security_fs_cron_save'])) {
             $data['security_fs_cron_save'] = $this->request->post['security_fs_cron_save'];

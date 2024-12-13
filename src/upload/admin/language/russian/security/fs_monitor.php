@@ -38,7 +38,7 @@ $_['text_column_crc']    = 'CRC';
 $_['entry_scan_name']        = 'Название сканирования';
 $_['entry_base_path']        = 'Базовый путь';
 $_['entry_extensions']       = 'Расширения файлов';
-$_['entry_extensions_help']  = 'Каждое расширение на новой строке';
+$_['entry_extensions_help']  = 'Каждое расширение на новой строке.';
 $_['entry_include']          = 'Добавить директории';
 $_['entry_exclude']          = 'Исключить директории';
 $_['entry_cron_access_key']  = 'Пароль доступа к cron';
@@ -46,9 +46,9 @@ $_['entry_cron_wget']        = 'wget';
 $_['entry_cron_curl']        = 'curl';
 $_['entry_cron_cli']         = 'cli';
 $_['entry_cron_save']        = 'Сохранять сканирования cron';
-$_['entry_cron_save_help']   = 'При сканировании с помощью cron сканирование будет добавлено как обычное';
+$_['entry_cron_save_help']   = 'При изменении файлов автоматическое сканирование будет добавлено как обычное.';
 $_['entry_cron_notify']      = 'Уведомлять при изменении';
-$_['entry_cron_notify_help'] = 'Вы будете уведомлены при событиях файловой системы';
+$_['entry_cron_notify_help'] = 'Вы будете уведомлены при изменении файлов.';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'дни';
