@@ -11,7 +11,7 @@
         <![CDATA[$data['online'] = $this->load->controller('dashboard/online');]]>
       </search>
       <add position="after">
-        <![CDATA[$data['fs_monitor'] = $this->load->controller('security/fs_monitor/widget');]]>
+        <![CDATA[$data['fs_monitor'] = $this->load->controller('module/fs_monitor/widget');]]>
       </add>
     </operation>
   </file>
@@ -21,7 +21,7 @@
         <![CDATA[<div class="col-lg-3 col-md-3 col-sm-6"><?php echo $online; ?></div>]]>
       </search>
       <add position="after">
-        <![CDATA[<div class="col-md-6 col-sm-12"><?php echo $fs_monitor; ?></div>]]>
+        <![CDATA[<div class="col-md-12 col-sm-12"><?php echo $fs_monitor; ?></div>]]>
       </add>
     </operation>
   </file>

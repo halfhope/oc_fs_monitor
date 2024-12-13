@@ -7,32 +7,51 @@
 	</div>
 
 	<div class="tile-body">
-		<?php echo $scan['date_added_ago'] ?>
-		<?php echo $scan['user_name'] ?>
+		<?php echo $scan['user_name'] ?>,&nbsp;<?php echo $scan['date_added_ago'] ?>
 
 		<?php if ($scan['scanned_count']): ?>
-		<a href="<?php echo $scan['href'] ?>#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">  <div class="fa fa-file-o"></div> <?php echo $scan['scanned_count'] ?></span></a>
+		<a href="<?php echo $scan['href'] ?>#scanned">
+			<span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">
+				<div class="fa fa-file-o"></div>&nbsp;<?php echo $scan['scanned_count'] ?>
+			</span>
+		</a>&nbsp;
 		<?php endif ?>
 
 		<?php if ($scan['new_count']): ?>
-		<a href="<?php echo $scan['href'] ?>#new"><span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $text_label_new; ?>">    <div class="fa fa-plus"></div> <?php echo $scan['new_count'] ?></span></a>
+		<a href="<?php echo $scan['href'] ?>#new">
+			<span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $text_label_new; ?>">
+				<div class="fa fa-plus"></div>&nbsp;<?php echo $scan['new_count'] ?>
+			</span>
+		</a>&nbsp;
 		<?php endif ?>
 
 		<?php if ($scan['changed_count']): ?>
-		<a href="<?php echo $scan['href'] ?>#changed"><span class="files-changed label label-warning" data-toggle="tooltip" title="<?php echo $text_label_changed; ?>">  <div class="fa fa-ellipsis-h"></div> <?php echo $scan['changed_count'] ?></span></a>
+		<a href="<?php echo $scan['href'] ?>#changed">
+			<span class="files-changed label label-warning" data-toggle="tooltip" title="<?php echo $text_label_changed; ?>">
+				<div class="fa fa-ellipsis-h"></div> <?php echo $scan['changed_count'] ?>
+			</span>
+		</a>&nbsp;
 		<?php endif ?>
 
 		<?php if ($scan['deleted_count']): ?>
-		<a href="<?php echo $scan['href'] ?>#deleted"><span class="files-deleted label label-danger" data-toggle="tooltip" title="<?php echo $text_label_deleted; ?>">  <div class="fa fa-minus"></div> <?php echo $scan['deleted_count'] ?></span></a>
+		<a href="<?php echo $scan['href'] ?>#deleted">
+			<span class="files-deleted label label-danger" data-toggle="tooltip" title="<?php echo $text_label_deleted; ?>">
+				<div class="fa fa-minus"></div>&nbsp;<?php echo $scan['deleted_count'] ?>
+			</span>
+		</a>&nbsp;
 		<?php endif ?>
 
 		<?php if ($scan['scan_size_rel'] == 0): ?>
 			<span class="label label-info" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>"><?php echo $scan['scan_size_rel_humanized'] ?></span>
 		<?php else: ?>
 			<?php if ($scan['scan_size_rel'] > 0): ?>
-			<span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">    <div class="fa fa-plus"></div> <?php echo $scan['scan_size_rel_humanized'] ?></span>
+			<span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">
+				<div class="fa fa-plus"></div>&nbsp;<?php echo $scan['scan_size_rel_humanized'] ?>
+			</span>
 			<?php else: ?>
-			<span class="files-added label label-danger" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">    <div class="fa fa-minus"></div> <?php echo $scan['scan_size_rel_humanized'] ?></span>
+			<span class="files-added label label-danger" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">
+				<div class="fa fa-minus"></div>&nbsp;<?php echo $scan['scan_size_rel_humanized'] ?>
+			</span>
 			<?php endif ?>
 		<?php endif ?>
 		<div class="pull-right mtop">

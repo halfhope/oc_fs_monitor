@@ -97,6 +97,7 @@ $_['button_scan_loading']   = 'Сканирование...';
 $_['button_rename_loading'] = 'Переименование...';
 $_['button_save']           = 'Сохранить';
 $_['button_delete']         = 'Удалить';
+$_['button_copy']           = 'Скопировать';
 $_['button_cancel']         = 'Отмена';
 $_['button_view']           = 'Просмотр';
 $_['button_generate']       = 'Генерировать настройки по умолчанию';
