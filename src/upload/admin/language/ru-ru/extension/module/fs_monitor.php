@@ -58,6 +58,8 @@ $_['entry_cron_save']        	= 'Сохранять сканирования cro
 $_['entry_cron_save_help']   	= 'При изменении файлов автоматическое сканирование будет добавлено как обычное.';
 $_['entry_cron_notify']      	= 'Уведомлять при изменении';
 $_['entry_cron_notify_help'] 	= 'Вы будете уведомлены при изменении файлов.';
+$_['entry_emails'] 	            = 'Email адрес для уведомлений';
+$_['entry_emails_help'] 	    = 'Введите адреса разделенные запятой';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'дни';

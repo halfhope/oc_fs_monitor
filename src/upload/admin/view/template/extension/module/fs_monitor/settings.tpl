@@ -172,6 +172,13 @@
 							</div>
 						</div>
 
+						<div class="form-group">
+							<label for="input-emails" class="col-sm-2 control-label"><?php echo $entry_emails; ?><span data-toggle="tooltip" title="<?php echo $entry_emails_help; ?>"></span></label>
+							<div class="col-sm-10">
+								<input type="text" name="security_fs_emails" id="input-emails" class="form-control" value="<?php echo $security_fs_emails; ?>"></textarea>
+							</div>
+						</div>
+
 					</fieldset>
 
 				</form>
