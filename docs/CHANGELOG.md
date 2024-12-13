@@ -47,3 +47,9 @@
 
 * feature: Added emails list for notifications
 
+#### 1.2.3
+
+* feature: Added notifications via Email, WhatsApp, and Telegram
+* fix: Corrected the rendering of the scan list page
+* fix: Fixed a bug where settings would reset
+
