@@ -164,8 +164,14 @@ class ModelModuleFSMonitor extends Model {
 			'security_fs_cron_access_key' => md5(mt_rand()),
 			'security_fs_cron_save' => 1,
 			'security_fs_cron_notify' => 1,
-			'security_fs_emails' => '',
-			'security_fs_exclude' => str_replace('|', PHP_EOL, 'system/storage/cache/|system/storage/modification/')
+			'security_fs_exclude' => str_replace('|', PHP_EOL, 'system/storage/cache/|system/storage/modification/'),
+			'security_fs_notify_to' => 'email',
+			'security_fs_e_emails' => '',
+			'security_fs_w_phone_number' => '',
+			'security_fs_w_business_account_id' => '',
+			'security_fs_w_api_token' => '',
+			'security_fs_t_api_token' => '',
+			'security_fs_t_channel_id' => '',
 		];
 
 		foreach ($defaults as $key => $value) {

@@ -28,6 +28,7 @@ $_['text_date_format_short']     = 'd.m.Y';
 $_['text_legend_module']  = 'Модуль';
 $_['text_legend_scanner'] = 'Сканер';
 $_['text_legend_cron']    = 'Cron (автосканирование)';
+$_['text_legend_notify']  = 'Уведомления';
 
 // Columns
 $_['text_column_name']   = 'Имя';
@@ -58,8 +59,23 @@ $_['entry_cron_save']        	= 'Сохранять сканирования cro
 $_['entry_cron_save_help']   	= 'При изменении файлов автоматическое сканирование будет добавлено как обычное.';
 $_['entry_cron_notify']      	= 'Уведомлять при изменении';
 $_['entry_cron_notify_help'] 	= 'Вы будете уведомлены при изменении файлов.';
-$_['entry_emails'] 	            = 'Email адрес для уведомлений';
-$_['entry_emails_help'] 	    = 'Введите адреса разделенные запятой';
+$_['entry_notify_to'] 	        = 'Способ уведомления';
+
+$_['tab_email'] 	            = 'Email';
+$_['tab_whatsapp'] 	            = 'WhatsApp';
+$_['tab_telegramm'] 	        = 'Telegram';
+
+$_['entry_e_emails'] 	        = 'Email адрес для уведомлений';
+$_['entry_e_emails_help'] 	    = 'Введите адреса разделенные запятой';
+
+$_['entry_w_phone_number'] 	        = 'Phone number';
+$_['entry_w_business_account_id'] 	= 'Business account ID';
+$_['entry_w_api_token'] 	        = 'API token';
+$_['text_whatsapp_help'] 	        = 'Необходим бизнес аккаунт с привязанным номером телефона. Инструкция доступна по <a href="https://turivishal.medium.com/permanent-access-token-for-whatsapp-business-apis-c81e1dfc86c7" target="_blank">ссылке</a>';
+
+$_['entry_t_api_token'] 	        = 'API token';
+$_['entry_t_channel_id'] 	        = 'Channel ID';
+$_['text_telegram_help'] 	        = 'Инструкция по созданию бота и получения API token доступна по <a href="https://medium.com/@Myreviewbites/how-to-send-message-through-telegram-bot-api-3c3530a53685" target="_blank">ссылке</a>';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'дни';
