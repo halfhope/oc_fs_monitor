@@ -4,25 +4,7 @@
  */
 
 // Heading
-$_['heading_title'] = 'FSMonitor - file system monitoring';
-
-// OpenCart Cron jobs
-$_['entry_cron_jobs']       	 = 'Cron job';
-$_['button_add_task']       	 = 'Add task to cron';
-$_['text_cron_interval_hour']    = 'Hour';
-$_['text_cron_interval_day']     = 'Day';
-$_['text_cron_interval_month']   = 'Month';
-$_['error_cron_job_installed']   = 'Cron task already exists. Click the <a href="%s" target="_blank">link</a> (new tab) to configure the cron job.';
-$_['success_cron_job_installed'] = 'Cron job successfully added. Click the <a href="%s" target="_blank">link</a> (new tab) to configure the cron job.';
-
-$_['text_mail_subject']       = 'File system monitoring - new events';
-$_['text_mail_header']        = 'Last scan by cron at %s was detected new file system events.';
-$_['text_mail_link']          = 'Scan:';
-$_['text_mail_new_files']     = 'new files.';
-$_['text_mail_changed_files'] = 'changed files.';
-$_['text_mail_deleted_files'] = 'deleted files.';
-$_['text_cron_scan_name']     = 'Automatic scanning';
-$_['text_cron_scan_user']     = 'cron';
+$_['heading_title'] = 'File system monitoring';
 
 // Text
 $_['text_security']              = 'Security';
@@ -43,9 +25,9 @@ $_['text_dashboard_scan']        = 'Dashboard';
 $_['text_initial_scan']          = 'Initial';
 $_['text_date_format_short']     = 'F j';
 
-$_['text_legend_module']  		= 'Module';
-$_['text_legend_scanner'] 		= 'Scanner';
-$_['text_legend_cron_opencart']	= 'Сron - OpenCart';
+$_['text_legend_module']  = 'Module';
+$_['text_legend_scanner'] = 'Scanner';
+$_['text_legend_cron']    = 'Cron';
 
 // Columns
 $_['text_column_name']   = 'Name';
@@ -57,21 +39,25 @@ $_['text_column_rights'] = 'Rights';
 $_['text_column_crc']    = 'CRC';
 
 // Entry
-$_['entry_scan_name']        = 'Scan name';
-$_['entry_admin_dir']        = 'Admin dir';
-$_['entry_base_path']        = 'Base path';
-$_['entry_extensions']       = 'Extenstions';
-$_['entry_extensions_help']  = 'Each extension on a new line';
-$_['entry_include']          = 'Include dirs';
-$_['entry_exclude']          = 'Exclude dirs';
-$_['entry_cron_access_key']  = 'Cron access key';
-$_['entry_cron_wget']        = 'wget';
-$_['entry_cron_curl']        = 'curl';
-$_['entry_cron_cli']         = 'cli';
-$_['entry_cron_save']        = 'Save cron scan';
-$_['entry_cron_save_help']   = 'Scans executed by cron will be added as a simple scans';
-$_['entry_cron_notify']      = 'Notify on changes';
-$_['entry_cron_notify_help'] = 'You\'ll be notified if there will be changes in the file system';
+$_['entry_scan_name']           = 'Scan name';
+$_['entry_admin_dir']           = 'Admin dir';
+$_['entry_base_path']           = 'Base path';
+$_['entry_extensions']          = 'Extenstions';
+$_['entry_extensions_help']     = 'Each extension on a new line';
+$_['entry_include']             = 'Include directories';
+$_['entry_include_help']     	= 'Each path is on a new line. Only folders.';
+$_['entry_include_help_block']  = 'Only absolute paths to folders without a mask can be used.<br>For example: <ul><li>/var/www/username/www-data/other_sitename.com/</li></ul>';
+$_['entry_exclude']          	= 'Exclude directories and files';
+$_['entry_exclude_help']     	= 'Each path is on a new line. Folders and files.';
+$_['entry_exclude_help_block']  = 'You can use both absolute and relative paths to folders and files with or without a mask.<br>For example:<ul><li>/var/www/username/www-data/other_sitename.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+$_['entry_cron_access_key']  	= 'Access password to the cron script';
+$_['entry_cron_wget']           = 'wget';
+$_['entry_cron_curl']           = 'curl';
+$_['entry_cron_cli']            = 'cli';
+$_['entry_cron_save']           = 'Save cron scan';
+$_['entry_cron_save_help']      = 'Scans executed by cron will be added as a simple scans';
+$_['entry_cron_notify']         = 'Notify on changes';
+$_['entry_cron_notify_help']    = 'You\'ll be notified if there will be changes in the file system';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'days';
@@ -111,6 +97,7 @@ $_['button_scan_loading']   = 'Scanning...';
 $_['button_rename_loading'] = 'Renaming...';
 $_['button_save']           = 'Save';
 $_['button_delete']         = 'Delete';
+$_['button_copy']           = 'Copy';
 $_['button_cancel']         = 'Cancel';
 $_['button_view']           = 'View';
 $_['button_generate']       = 'Generate default settings';

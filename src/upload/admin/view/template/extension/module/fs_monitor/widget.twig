@@ -7,32 +7,51 @@
 	</div>
 
 	<div class="tile-body">
-		{{ scan.date_added_ago }}
-		{{ scan.user_name }}
+		{{ scan.user_name }},&nbsp;{{ scan.date_added_ago }}
 
 		{% if scan.scanned_count %}
-		<a href="{{ scan.href }}#scanned"><span class="files-scanned label label-default" data-toggle="tooltip" title="{{ text_label_scanned }}">  <div class="fa fa-file-o"></div> {{ scan.scanned_count }}</span></a>
+		<a href="{{ scan.href }}#scanned">
+			<span class="files-scanned label label-default" data-toggle="tooltip" title="{{ text_label_scanned }}">
+				<div class="fa fa-file-o"></div>&nbsp;{{ scan.scanned_count }}
+			</span>
+		</a>&nbsp;
 		{% endif %}
 
 		{% if scan.new_count %}
-		<a href="{{ scan.href }}#new"><span class="files-added label label-success" data-toggle="tooltip" title="{{ text_label_new }}">    <div class="fa fa-plus"></div> {{ scan.new_count }}</span></a>
+		<a href="{{ scan.href }}#new">
+			<span class="files-added label label-success" data-toggle="tooltip" title="{{ text_label_new }}">
+				<div class="fa fa-plus"></div>&nbsp;{{ scan.new_count }}
+			</span>
+		</a>&nbsp;
 		{% endif %}
 
 		{% if scan.changed_count %}
-		<a href="{{ scan.href }}#changed"><span class="files-changed label label-warning" data-toggle="tooltip" title="{{ text_label_changed }}">  <div class="fa fa-ellipsis-h"></div> {{ scan.changed_count }}</span></a>
+		<a href="{{ scan.href }}#changed">
+			<span class="files-changed label label-warning" data-toggle="tooltip" title="{{ text_label_changed }}">
+				<div class="fa fa-ellipsis-h"></div>&nbsp;{{ scan.changed_count }}
+			</span>
+		</a>&nbsp;
 		{% endif %}
 
 		{% if scan.deleted_count %}
-		<a href="{{ scan.href }}#deleted"><span class="files-deleted label label-danger" data-toggle="tooltip" title="{{ text_label_deleted }}">  <div class="fa fa-minus"></div> {{ scan.deleted_count }}</span></a>
+		<a href="{{ scan.href }}#deleted">
+			<span class="files-deleted label label-danger" data-toggle="tooltip" title="{{ text_label_deleted }}">
+				<div class="fa fa-minus"></div>&nbsp;{{ scan.deleted_count }}
+			</span>
+		</a>&nbsp;
 		{% endif %}
 
 		{% if scan.scan_size_rel == 0 %}
 			<span class="label label-info" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}>">{{ scan.scan_size_rel_humanized }}</span>
 		{% else %}
 			{% if scan.scan_size_rel > 0 %}
-			<span class="files-added label label-success" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">    <div class="fa fa-plus"></div> {{ scan.scan_size_rel_humanized }}</span>
+			<span class="files-added label label-success" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">
+				<div class="fa fa-plus"></div>&nbsp;{{ scan.scan_size_rel_humanized }}
+			</span>
 			{% else %}
-			<span class="files-added label label-danger" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">    <div class="fa fa-minus"></div> {{ scan.scan_size_rel_humanized }}</span>
+			<span class="files-added label label-danger" data-toggle="tooltip" title="{{ scan.scan_size_abs_humanized }}">
+				<div class="fa fa-minus"></div>&nbsp;{{ scan.scan_size_rel_humanized }}
+			</span>
 			{% endif %}
 		{% endif %}
 		<div class="pull-right mtop">
