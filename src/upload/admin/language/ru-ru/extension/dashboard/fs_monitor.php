@@ -3,14 +3,14 @@
 $_['heading_title']    = 'FSMonitor';
 
 // Text
-$_['text_extension']   = 'Extensions';
-$_['text_success']     = 'Success: You have modified FSMonitor widget!';
-$_['text_edit']        = 'Edit FSMonitor widget';
+$_['text_extension']   = 'Расширения';
+$_['text_success']     = 'Настройки виджета FSMonitor сохранены!';
+$_['text_edit']        = 'Редактирование виджета FSMonitor';
 
 // Entry
-$_['entry_status']     = 'Status';
-$_['entry_sort_order'] = 'Sort Order';
-$_['entry_width']      = 'Width';
+$_['entry_status']     = 'Статус';
+$_['entry_sort_order'] = 'Порядок сортировки';
+$_['entry_width']      = 'Ширина';
 
 // Error
-$_['error_permission'] = 'Warning: You do not have permission to modify FSMonitor widget!';
+$_['error_permission'] = 'У вас нет прав для редактирования виджета FSMonitor!';

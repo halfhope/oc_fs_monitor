@@ -3,20 +3,21 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
-include_once(DIR_SYSTEM . 'library/security/compatible_controller.php');
+class ControllerExtensionDashboardFSMonitor extends ControllerDashboardFSMonitor {}
 
-class ControllerExtensionDashboardFSMonitor extends CompatibleController
+class ControllerDashboardFSMonitor extends Controller
 {
 	private $error = array();
 
-	public function __construct($registry)
-	{
-		parent::__construct($registry);
-		$this->load->language('security/fs_monitor');
-		$this->load->language('extension/dashboard/fs_monitor');
-	}
+	public 	$_version 			= '1.1.2';
+	private	$_module_route 		= 'extension/module/fs_monitor';
+	private	$_dashboard_route 	= 'extension/dashboard/fs_monitor';
+	private	$_extensions_route 	= 'extension/extension';
 
 	public function index() {
+		
+		$this->load->language($this->_dashboard_route);
+
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/setting');
@@ -26,7 +27,7 @@ class ControllerExtensionDashboardFSMonitor extends CompatibleController
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=dashboard', true));
+			$this->response->redirect($this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=dashboard', true));
 		}
 
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -50,24 +51,24 @@ class ControllerExtensionDashboardFSMonitor extends CompatibleController
 
 		$data['breadcrumbs'] = array();
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][]  = array(
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], true)
 		);
-
-		$data['breadcrumbs'][] = array(
+		
+		$data['breadcrumbs'][]  = array(
 			'text' => $this->language->get('text_extension'),
-			'href' => $this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=dashboard', true)
+			'href' => $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=dashboard', true)
 		);
 
-		$data['breadcrumbs'][] = array(
+		$data['breadcrumbs'][]  = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/dashboard/fs_monitor', 'token=' . $this->session->data['token'], true)
+			'href' => $this->url->link($this->_dashboard_route, 'token=' . $this->session->data['token'], true)
 		);
 
-		$data['action'] = $this->url->link('extension/dashboard/fs_monitor', 'token=' . $this->session->data['token'], true);
+		$data['action'] = $this->url->link($this->_dashboard_route, 'token=' . $this->session->data['token'], true);
 
-		$data['cancel'] = $this->url->link('extension/extension', 'token=' . $this->session->data['token'] . '&type=dashboard', true);
+		$data['cancel'] = $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=dashboard', true);
 
 		if (isset($this->request->post['dashboard_fs_monitor_width'])) {
 			$data['dashboard_fs_monitor_width'] = $this->request->post['dashboard_fs_monitor_width'];
@@ -75,12 +76,8 @@ class ControllerExtensionDashboardFSMonitor extends CompatibleController
 			$data['dashboard_fs_monitor_width'] = $this->config->get('dashboard_fs_monitor_width');
 		}
 	
-		$data['columns'] = array();
-		
-		for ($i = 3; $i <= 12; $i++) {
-			$data['columns'][] = $i;
-		}
-				
+		$data['columns'] = array(6, 12);
+			
 		if (isset($this->request->post['dashboard_fs_monitor_status'])) {
 			$data['dashboard_fs_monitor_status'] = $this->request->post['dashboard_fs_monitor_status'];
 		} else {
@@ -96,19 +93,20 @@ class ControllerExtensionDashboardFSMonitor extends CompatibleController
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view('security/fs_monitor_widget_form', $data));
+		
+		$this->response->setOutput($this->load->view($this->_module_route . '/widget_form', $data));
 	}
 
 	protected function validate() {
-		if (!$this->user->hasPermission('modify', 'extension/dashboard/fs_monitor')) {
+		if (!$this->user->hasPermission('modify', $this->_dashboard_route)) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		return !$this->error;
 	}
-	
-	public function dashboard() {
-		return $this->compatibleGetChild('security/fs_monitor/widget');
+
+	public function dashboard()
+	{
+		return $this->load->controller($this->_module_route . '/widget');
 	}
 }
