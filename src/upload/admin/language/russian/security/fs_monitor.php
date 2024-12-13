@@ -20,6 +20,8 @@ $_['text_label_new']             = 'Новые';
 $_['text_label_changed']         = 'Изменены';
 $_['text_label_deleted']         = 'Удалены';
 $_['text_view']                  = 'Просмотр сканирования';
+$_['text_view_all']              = 'Смотреть все';
+$_['text_dashboard_scan']        = 'Панель управления';
 $_['text_initial_scan']          = 'Первичное';
 $_['text_date_format_short']     = 'd.m.Y';
 
@@ -37,21 +39,25 @@ $_['text_column_rights'] = 'Права';
 $_['text_column_crc']    = 'CRC';
 
 // Entry
-$_['entry_scan_name']        = 'Название сканирования';
-$_['entry_admin_dir']        = 'Директория административного раздела';
-$_['entry_base_path']        = 'Базовый путь';
-$_['entry_extensions']       = 'Расширения файлов';
-$_['entry_extensions_help']  = 'Каждое расширение на новой строке.';
-$_['entry_include']          = 'Добавить директории';
-$_['entry_exclude']          = 'Исключить директории';
-$_['entry_cron_access_key']  = 'Пароль доступа к cron';
-$_['entry_cron_wget']        = 'wget';
-$_['entry_cron_curl']        = 'curl';
-$_['entry_cron_cli']         = 'cli';
-$_['entry_cron_save']        = 'Сохранять сканирования cron';
-$_['entry_cron_save_help']   = 'При изменении файлов автоматическое сканирование будет добавлено как обычное.';
-$_['entry_cron_notify']      = 'Уведомлять при изменении';
-$_['entry_cron_notify_help'] = 'Вы будете уведомлены при изменении файлов.';
+$_['entry_scan_name']        	= 'Название сканирования';
+$_['entry_admin_dir']        	= 'Директория административного раздела';
+$_['entry_base_path']        	= 'Базовый путь для сканера';
+$_['entry_extensions']       	= 'Расширения файлов';
+$_['entry_extensions_help']  	= 'Каждое расширение на новой строке.';
+$_['entry_include']          	= 'Добавить дополнительную директорию';
+$_['entry_include_help']     	= 'Каждый путь на новой строке. Только папки.';
+$_['entry_include_help_block']  = 'Можно использовать только абсолютные пути к папкам без маски.<br>Например:<ul><li>/var/www/username/www-data/other_sitename.com/</li></ul>';
+$_['entry_exclude']          	= 'Исключить директории или файлы';
+$_['entry_exclude_help']     	= 'Каждый путь на новой строке. Папки и файлы, по маске.';
+$_['entry_exclude_help_block']  = 'Можно использовать как абсолютные, так и относительные пути к папкам и файлам с маской.<br>Например:<ul><li>/var/www/username/www-data/other_sitename.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+$_['entry_cron_access_key']  	= 'Пароль доступа к cron скрипту';
+$_['entry_cron_wget']        	= 'wget';
+$_['entry_cron_curl']        	= 'curl';
+$_['entry_cron_cli']         	= 'cli';
+$_['entry_cron_save']        	= 'Сохранять сканирования cron';
+$_['entry_cron_save_help']   	= 'При изменении файлов автоматическое сканирование будет добавлено как обычное.';
+$_['entry_cron_notify']      	= 'Уведомлять при изменении';
+$_['entry_cron_notify_help'] 	= 'Вы будете уведомлены при изменении файлов.';
 
 // Interval datetime functions
 $_['text_interval_days']                   = 'дни';
