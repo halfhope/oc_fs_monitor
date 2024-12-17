@@ -63,7 +63,7 @@ $_['entry_notify_to'] 	        = 'Способ уведомления';
 
 $_['tab_email'] 	            = 'Email';
 $_['tab_whatsapp'] 	            = 'WhatsApp';
-$_['tab_telegramm'] 	        = 'Telegram';
+$_['tab_telegram'] 	            = 'Telegram';
 
 $_['entry_e_emails'] 	        = 'Email адрес для уведомлений';
 $_['entry_e_emails_help'] 	    = 'Введите адреса разделенные запятой';
@@ -134,5 +134,6 @@ $_['error_form']            = 'Пожалуйста, проверьте форм
 $_['error_base_path']       = 'Базовый путь является обязательным полем!';
 $_['error_extensions']      = 'Это поле является обязательным для работы сканера!';
 $_['error_cron_access_key'] = 'Это поле является обязательным для безопасной работы сканера!';
+$_['error_scan_doesnt_exists'] = 'Скан не существует';
 
 ?>

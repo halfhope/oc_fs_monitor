@@ -1,184 +1,459 @@
 <?php echo $header; ?><?php echo $column_left; ?>
 <div id="content">
-	<style>svg.octicon{fill:currentColor;vertical-align:text-bottom;color:#ccc;background:#fff;z-index:2;position:relative}.security-scans-container{position:relative}.security-scan-list{padding-left:25px}.security-scan-list:before{position:absolute;top:0;bottom:0;left:6px;z-index:1;display:block;width:2px;content:"";background-color:#f3f3f3}.security-scan-list .day{margin-left:-25px;font-size:14px;color:#767676;padding-bottom:10px}.security-scan-list .scan-list-checkbox{width:30px;padding-left:5px;line-height:38px;display:inline-block;float:left}.security-scan-list .security-scan + .day{padding-top:10px}.security-scan-list .day span{margin-left:7px}.security-scan{margin:0;border:1px solid #e5e5e5;padding:8px 10px}.security-scan:hover{background:#f7fbfc}.security-scan.row .scan-heading{padding-left:0}.security-scan + .security-scan{border-top:none}.security-scan .scan-name{font-size:15px;font-weight:700}.security-scan .scan-name a{color:#4e575b}.security-scan .scan-date-added{color:#767676}.security-scan .changes-list{color:#767676;line-height:38px}.security-scan span.label{font-size:10pt}.security-scans-container>.pagination{margin:1em 0 0 2em;}</style>
-	<div class="page-header">
-		<div class="container-fluid">
-			<div class="pull-right">
-				<a href="#" data-toggle="tooltip" title="<?php echo $button_scan; ?>" id="button-scan" class="btn btn-success"><i class="fa fa-plus"></i></a>
-				<a href="#" data-toggle="tooltip" title="<?php echo $button_delete; ?>" id="button-delete" class="btn btn-danger" disabled="disabled"><i class="fa fa-trash-o"></i></a>
-				<a href="<?php echo $action_settings; ?>" data-toggle="tooltip" title="<?php echo $button_settings; ?>" id="button-settings" class="btn btn-primary"><i class="fa fa-cog"></i></a>
-			</div>
-			<h1><?php echo $heading_title; ?></h1>
-			<ul class="breadcrumb">
-				<?php foreach ($breadcrumbs as $breadcrumb) { ?>
-				<li><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a></li>
-				<?php } ?>
-			</ul>
-		</div>
-	</div>
-	<div class="container-fluid">
-		<?php if ($error_warning) { ?>
-		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-		</div>
-		<?php } ?>
-		<?php if ($success) { ?>
-		<div class="alert alert-success"><i class="fa fa-check-circle"></i> <?php echo $success; ?>
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-		</div>
-		<?php } ?>
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title"><i class="fa fa-list"></i> <?php echo $panel_title; ?></h3><h3 class="panel-title pull-right">v<?php echo $version ?></h3>
-			</div>
-			<div class="panel-body">
-				<div class="security-scans-container">
-					<form action="<?php echo $action_delete; ?>" method="post" enctype="multipart/form-data" id="form-scans-list">
-						<div class="security-scan-list">
-							<?php foreach ($scans as $date_key => $date_scans): ?>
-							<div class="day">
-								<svg aria-hidden="true" class="octicon" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
-								<span><?php echo $date_key ?></span>
-							</div>
-							<?php foreach ($date_scans as $key => $scan): ?>
-							<div class="security-scan row">
+<style>
+#fsm {
+	font-family: 'Open Sans', sans-serif;
+	font-size: 12px;
+	color: #666666;
+	text-rendering: optimizeLegibility;
+}
+.fsm-container-fluid {
+	padding: 0px 20px;
+}
+.fsm-page-header {
+	margin: 15px 0;
+	padding: 0;
+	border-bottom: none;
+	display:flex;
+	align-items: flex-end;
+}
+.fsm-page-header h1{
+	margin: 0px;
+	font-weight: 300;
+	font-size: 30px;
+	color: #4c4d5a;
+	text-shadow: 0 1px #fff;
+}
+.fsm-page-header h1 + h1{
+	margin-left: 15px;
+}
+.fsm-btn-group {
+	margin-left: auto;
+}
+.fsm-page-header .fs-btn + .fs-btn {
+	margin-left: 5px;
+}
+/* helpers */
+.fsm-pull-right {
+	margin-left: auto;
+}
+/* panel */
+.fsm-panel {
+	padding: 15px;
+	border: 1px solid #ccc;
+	border-top-width: 3px;
+	border-top-color: #666;
+	border-radius: 4px;
+}
+/* scans */
 
-								<div class="scan-heading pull-left col-sm-4 col-xs-12">
-									<div class="scan-list-checkbox">
-										<input type="checkbox" name="scans[<?php echo $scan['scan_id'] ?>]" value="<?php echo $scan['scan_id'] ?>">
-									</div>
-									<div class="scan-name"><a href="<?php echo $scan['href'] ?>"><?php echo $scan['name'] ?></a></div>
-									<div class="scan-date-added"><b><?php echo $scan['user_name'] ?></b>, <?php echo $scan['date_added_ago'] ?></div>
-								</div>
+.fs-scan-list {
+}
+.fs-scan-group {
+	margin-bottom: 10px;
+}
+.fs-scan-group .fs-day {
+	font-size: 14px;
+	color: #767676;
+	margin-bottom: 10px
+}
+.fs-scan-list .fs-scan-summary+.fs-day {
+	padding-top: 10px
+}
+.fs-scan-list .day span {
+	margin-left: 7px
+}
 
-								<div class="changes-list col-sm-3 col-xs-6">
-									<?php if ($scan['scanned_count']): ?>
-									<a href="<?php echo $scan['href'] ?>#scanned">
-										<span class="files-scanned label label-default" data-toggle="tooltip" title="<?php echo $text_label_scanned; ?>">
-											<div class="fa fa-file-o"></div>&nbsp;<?php echo $scan['scanned_count'] ?>
-										</span>
-									</a>&nbsp;
-									<?php endif ?>
-
-									<?php if ($scan['new_count']): ?>
-									<a href="<?php echo $scan['href'] ?>#new">
-										<span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $text_label_new; ?>">
-											<div class="fa fa-plus"></div>&nbsp;<?php echo $scan['new_count'] ?>
-										</span>
-									</a>&nbsp;
-									<?php endif ?>
-
-									<?php if ($scan['changed_count']): ?>
-									<a href="<?php echo $scan['href'] ?>#changed">
-										<span class="files-changed label label-warning" data-toggle="tooltip" title="<?php echo $text_label_changed; ?>">
-											<div class="fa fa-ellipsis-h"></div>&nbsp;<?php echo $scan['changed_count'] ?>
-										</span>
-									</a>&nbsp;
-									<?php endif ?>
-
-									<?php if ($scan['deleted_count']): ?>
-									<a href="<?php echo $scan['href'] ?>#deleted">
-										<span class="files-deleted label label-danger" data-toggle="tooltip" title="<?php echo $text_label_deleted; ?>">
-											<div class="fa fa-minus"></div>&nbsp;<?php echo $scan['deleted_count'] ?>
-										</span>
-									</a>&nbsp;
-									<?php endif ?>
-								</div>
-
-								<div class="changes-list col-sm-3 col-xs-3">
-									<?php if ($scan['scan_size_rel'] == 0): ?>
-										<span class="label label-info" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>"><?php echo $scan['scan_size_rel_humanized'] ?></span>
-									<?php else: ?>
-										<?php if ($scan['scan_size_rel'] > 0): ?>
-										<span class="files-added label label-success" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">
-											<div class="fa fa-plus"></div>&nbsp;<?php echo $scan['scan_size_rel_humanized'] ?>
-										</span>
-										<?php else: ?>
-										<span class="files-added label label-danger" data-toggle="tooltip" title="<?php echo $scan['scan_size_abs_humanized'] ?>">
-											<div class="fa fa-minus"></div>&nbsp;<?php echo $scan['scan_size_rel_humanized'] ?>
-										</span>
-										<?php endif ?>
-									<?php endif ?>
-								</div>
-
-								<div class="changes-list col-sm-2 col-xs-3">
-									<div class="pull-right">
-										<a href="<?php echo $scan['href']; ?>" data-toggle="tooltip" title="<?php echo $button_view; ?>" class="btn btn-default"><i class="fa fa-eye"></i></a>
-									</div>
-								</div>
-
-							</div>
-							<?php endforeach ?>
-
-							<?php endforeach ?>
-
-						</div>
-					</form>
-					<div class="pagination"><?php echo $pagination ?></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="modal fade" id="addScan" tabindex="0" role="dialog">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="<?php echo $button_cancel ?>"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title"><?php echo $text_modal_title ?></h4>
-			</div>
-			<div class="modal-body">
-				<form action="<?php echo $action_scan; ?>" method="post" enctype="multipart/form-data" id="form-scan">
-					<div class="form-group required">
-						<label for="scan_name" class="control-label"><?php echo $entry_scan_name ?></label>
-						<input type="text" class="form-control" name="scan_name" id="scan_name" placeholder="<?php echo $text_scan_name_placeholder ?>" autocomplete="off">
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo $button_cancel ?></button>
-				<button type="submit" id="scanNow" data-loading-text="<?php echo $button_scan_loading ?>" class="btn btn-success"><?php echo $button_scan ?></button>
-			</div>
-		</div>
-	</div>
-</div>
+/* scan summary */
+.fs-scan-summary {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-evenly;
+	width: 100%;
+	/* border-radius: 4px; */
+	padding: 5px;
+	border: 1px solid #DDDDDD;
+	font-size: 1em;
+	color: #666;
+}
+.fs-view-scan-summary {
+	margin-bottom: 1em;
+}
+.fs-scan-summary.fs-selected {
+	background: #e9e9e9;
+}
+.fs-scan-summary:not(.fs-selected):hover {
+	background: #f7fbfc
+}
+.fs-scan-summary+.fs-scan-summary {
+	border-top: none;
+}
+.fs-scan-summary:first-child{
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+.fs-scan-summary:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+.fs-scan-list .fs-checkbox {
+	width: 25px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+.fs-scan-list .fs-checkbox input[type=checkbox] {
+	margin: 0;
+}
+.fs-scan-list .fs-checkbox input[type=checkbox]:hover {
+	cursor: pointer;
+}
+.fs-scan-name {
+	font-size: 15px;
+	font-weight: 600;
+	cursor:pointer
+}
+.fs-scan-name a {
+	color: #4e575b
+}
+.fs-scan-name span i.fa{
+	margin-left: 10px;
+}
+.fs-scan-date-added {
+	color: #767676
+}
+.fs-changes-list {
+	flex: 25%;
+	padding-left: 0 5px;
+}
+.fs-changes-list:first-child {
+	display: flex;
+	padding-left: 5px;
+}
+.fs-changes-list:last-child {
+	flex: none;
+	width: 50px;
+	padding:none;
+}
+.fs-changes-list + .fs-changes-list{
+	border-left: 1px solid #ddd;
+	padding-left: 5px;
+}
+.fs-scan-summary .changes-list {
+	color: #767676;
+	border-left: 1px solid #ddd;
+	padding: 0px 5px;
+	line-height: 38px;
+}
+/* pagination */
+.fs-pagination {
+	margin: 1em 0 0 2em;
+}
+/* breadchtumb */
+.fs-breadcrumb {
+	display: inline-block;
+	background: none;
+	margin: 0;
+	padding: 0 10px;
+	border-radius: 0;
+}
+.fs-breadcrumb > li {
+	display: inline-block;
+	text-shadow: 0 1px #fff;
+}
+.fs-breadcrumb li + li:before {
+	content: "\f105";
+	font-family: FontAwesome;
+	color: #BBBBBB;
+	padding: 0 5px;
+	font-size: 10px;
+}
+.fs-breadcrumb > li:last-child a {
+	color: #1e91cf;
+}
+.fs-breadcrumb li a {
+	color: #999999;
+	font-size: 14px;
+	padding: 0px;
+	margin: 0px;
+}
+/* badges */
+.fs-badge {
+	display: inline;
+	font-size: 10pt;
+	padding: 0.2em 0.6em 0.3em;
+	font-weight: bold;
+	line-height: 2.5;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-radius: 0.25em;
+}
+.fs-default {
+	background-color: #777;
+}
+.fs-primary {
+	background-color: #1e91cf;
+}
+.fs-success {
+	background-color: #4cb64c;
+}
+.fs-warning {
+	background-color: #f3a638;
+}
+.fs-danger {
+	background-color: #e3503e;
+}
+.fs-badge+.fs-badge {
+	margin-left: 5px;
+}
+/* buttons */
+.fs-btn {
+	display: inline-block;
+	margin-bottom: 0;
+	font-weight: normal;
+	text-align: center;
+	vertical-align: middle;
+	touch-action: manipulation;
+	cursor: pointer;
+	background-image: none;
+	border: 1px solid transparent;
+	white-space: nowrap;
+	padding: 8px 13px;
+	font-size: 13px;
+	line-height: 1.42857;
+	border-radius: 3px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.fs-btn-sm, .fs-btn-group-sm > .fs-btn {
+	padding: 4px 9px;
+	font-size: 11px;
+	line-height: 1.5;
+	border-radius: 2px;
+}
+.fs-btn[disabled] {
+	cursor: not-allowed;
+	opacity: 0.65;
+	filter: alpha(opacity = 65);
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+.fs-btn.fs-btn-primary {
+	color: #fff;
+	background-color: #1e91cf;
+	border-color: #197bb0;
+}
+.fs-btn.fs-btn-primary:hover {
+	color: #fff;
+	background-color: #1872a2;
+	border-color: #12567a;
+}
+.fs-btn.fs-btn-default {
+	color: #666;
+	background-color: #fff;
+	border-color: #ddd;
+}
+.fs-btn.fs-btn-default:hover {
+	color: #666;
+	background-color: #e6e6e6;
+	border-color: #bebebe;
+}
+.fs-btn.fs-btn-success {
+	color: #fff;
+	background-color: #4cb64c;
+	border-color: #409e40;
+}
+.fs-btn.fs-btn-success:hover {
+	color: #fff;
+	background-color: #3c933c;
+	border-color: #2f722f;
+}
+.fs-btn.fs-btn-warning {
+	color: #fff;
+	background-color: #f3a638;
+	border-color: #f19716;
+}
+.fs-btn.fs-btn-warning:hover {
+	color: #fff;
+	background-color: #ea8f0e;
+	border-color: #bf750b;
+}
+.fs-btn.fs-btn-danger {
+	color: #fff;
+	background-color: #e3503e;
+	border-color: #dd3520;
+}
+.fs-btn.fs-btn-danger:hover {
+	color: #fff;
+	background-color: #d0321e;
+	border-color: #a82818;
+}
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+	.fs-changes-list {
+		flex: 100%;
+	}
+}
+/* X-Large devices (large desktops, 1200px and up) */
+<div class="pull-right">
+/* Medium devices (tablets, 768px and up) */
+<a href="<?php echo $scan['href'] ?>#deleted">
+@media (min-width: 768px) {
+	.fs-changes-list {
+		flex: 30%;
+	}
+}
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+	.fs-changes-list {
+		flex: 30%;
+	}
+}
+/* X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+	.fs-changes-list {
+		flex: 30%;
+	}
+}
+/* XX-Large devices (larger desktops, 1400px and up) */
+@media (min-width: 1400px) {
+	.fs-changes-list {
+		flex: 30%;
+	}
+}
+/* span.label{font-size:10pt} */
+.fs-scan-data {
+	margin-bottom: 1em;
+}
+.fs-table-security tr>td:first-child:hover{
+	cursor: pointer;
+}
+.fs-table-caption{font-size:15px;font-weight:600;margin-bottom:1em;}
+table.fs-table-security{table-layout:fixed}
+table.fs-table-security *{font-family:Consolas;font-size:9pt;color:#666}
+table.fs-table-security{border:1px solid #ccf;width:100%;border-collapse:collapse;border:1px solid #8892BF}
+table.fs-table-security > thead > tr{background:#ccf}
+table.fs-table-security > thead > tr > th{background:#8892BF;padding:3px 5px;color:#fff;text-align:left;border-bottom:1px solid #8892BF;border-radius:0!important;text-transform:none;}
+table.fs-table-security > thead > tr > th + th{border-left:1px solid #99c}
+table.fs-table-security > tbody > tr > td{padding:3px}
+table.fs-table-security > tbody > tr > td:first-child{overflow:hidden;white-space:nowrap;}
+table.fs-table-security > tbody > tr:nth-child(odd){background:#eef}
+table.fs-table-security > tbody > tr:hover{background:#ddf}
+table.fs-table-security > tbody > tr > td.changed{background:#4F5B93;color:#fff}
+table.fs-table-security.fs-table-hidden{display:none}
+table td a{color:#666}
+table th.fs-col-type{width:50px}
+table th.fs-col-size{width:150px}
+table th.fs-col-mtime{width:140px}
+table th.fs-col-ctime{width:140px}
+table th.fs-col-rights{width:50px}
+table th.fs-col-crc{width:100px}
+.fs-copy-btn:hover, .fs-accordeon-toggle:hover{
+	cursor: pointer;
+}
+fieldset {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	min-width: 0;
+}
+fieldset legend {
+	display: block;
+	width: 100%;
+	padding: 0;
+	margin-bottom: 17px;
+	font-size: 18px;
+	line-height: inherit;
+	color: #333;
+	border: 0;
+	border-bottom: 1px solid #e5e5e5;
+	padding-bottom: 5px;
+}
+.fs-form-group{
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-bottom: 0;
+	display:flex;
+}
+.fs-control-label{
+	text-align: right;
+	margin-bottom: 0;
+	padding-top: 9px;
+	font-weight: 600;
+}
+.fs-required .fs-control-label:before{
+	content: '* ';
+	color: #F00;
+	font-weight: bold;
+}
+.fs-control-label span:after {
+	font-family: FontAwesome;
+	color: #1E91CF;
+	content: "\f059";
+	margin-left: 4px;
+}
+.fs-form-control {
+	display: block;
+	outline: none;
+	width: 100%;
+	height: 36px;
+	padding: 8px 13px;
+	font-size: 13px;
+	line-height: 1.42857;
+	color: #555;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+	-webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+	-o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+	transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+.fs-form-control:hover {
+	border: 1px solid #b9b9b9;
+	border-top-color: #a0a0a0;
+	-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+.fs-form-control[disabled], .fs-form-control[readonly], fieldset[disabled] .fs-form-control {
+	background-color: #eee;
+	opacity: 1;
+}
+textarea.fs-form-control {
+	min-height: 100px;
+}
+.fs-col-sm-2 {
+	flex: 15%;
+}
+.fs-col-sm-10 {
+	flex:80%;
+}
+.fs-col-sm-10, .fs-col-sm-2 {
+	position: relative;
+	min-height: 1px;
+	padding-left: 15px;
+	padding-right: 15px;
+}
+html {
+	overflow-y: scroll;
+}
+</style>
+</style>
 <script>
-$(document).ready(function() {
-	$('#button-scan').click(function(event) {
-		event.preventDefault();
-		$('#addScan').modal();
-	});
-
-	$('#scanNow').click(function(event){
-		event.preventDefault();
-		$('#form-scan').submit();
-	});
-
-	$('#addScan').on('shown.bs.modal', function (event) {
-		$('#scan_name').focus();
-	});
-
-	$('form#form-scan').on('submit', function(event){
-		$('#scanNow').button('loading');
-	});
-
-	$('input[type="checkbox"][name^="scans"]').click(function(event) {
-		var checked = $('input[type="checkbox"][name^="scans"]:checked').length;
-		if (checked >= 1) {
-			$('#button-delete').attr('disabled', false);
-		}else{
-			$('#button-delete').attr('disabled', true);
-		}
-	});
-
-	$('#button-delete').on('click', function(event) {
-		event.preventDefault();
-		var checked = $('input[type="checkbox"][name^="scans"]:checked').length;
-		if (checked >= 1) {
-			$('#form-scans-list').submit();
-		}
-	});
-});
+	const initialData = <?php echo html_entity_decode($initial_data, ENT_QUOTES, 'UTF-8') ?>;
 </script>
+
+	<div id="fsm" class="form-horizontal"></div>
+	<!-- <script src="https://unpkg.com/mithril/mithril.js"></script> -->
+	<script src="/admin/view/javascript/fs_monitor/assets/mithril.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.35.4/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script type="module" src="/admin/view/javascript/fs_monitor/index.js"></script>
+</div>
 <?php echo $footer; ?>

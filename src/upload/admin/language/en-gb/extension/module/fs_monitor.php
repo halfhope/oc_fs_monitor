@@ -63,7 +63,7 @@ $_['entry_notify_to'] 	        = 'Notify to';
 
 $_['tab_email'] 	            = 'Email';
 $_['tab_whatsapp'] 	            = 'WhatsApp';
-$_['tab_telegramm'] 	        = 'Telegram';
+$_['tab_telegram'] 	            = 'Telegram';
 
 $_['entry_e_emails'] 	        = 'Email';
 $_['entry_e_emails_help'] 	    = 'Separated by commas';
@@ -134,5 +134,5 @@ $_['error_form']            = 'Warning: Please check form on errors!';
 $_['error_base_path']       = 'Base path is required!';
 $_['error_extensions']      = 'Extenstions is required!';
 $_['error_cron_access_key'] = 'Access key is required!';
-
+$_['error_scan_doesnt_exists'] = 'Scan doesn\'t exists!';
 ?>

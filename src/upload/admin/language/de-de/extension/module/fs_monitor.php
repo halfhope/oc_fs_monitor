@@ -85,7 +85,7 @@ $_['entry_notify_to'] 	            = 'Notify to';
 
 $_['tab_email'] 	                = 'Email';
 $_['tab_whatsapp'] 	                = 'WhatsApp';
-$_['tab_telegramm'] 	            = 'Telegram';
+$_['tab_telegram'] 	                = 'Telegram';
 
 $_['entry_e_emails'] 	            = 'Email';
 $_['entry_e_emails_help'] 	        = 'Durch Kommas getrennt';
@@ -155,3 +155,4 @@ $_['error_form']							= 'Einstellungen sind nicht vollständig';
 $_['error_base_path']						= 'Basispfad ist erforderlich';
 $_['error_extensions']						= 'Erweiterungen sind erforderlich';
 $_['error_cron_access_key']					= 'Zugangschlüssel ist erforderlich';
+$_['error_scan_doesnt_exists']              = 'Scan existiert nicht!';

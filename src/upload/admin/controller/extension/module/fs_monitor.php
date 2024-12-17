@@ -3,6 +3,16 @@
  * @author Shashakhmetov Talgat <talgatks@gmail.com>
  */
 
+if (!function_exists("array_key_last")) {
+	function array_key_last($array) {
+		if (!is_array($array) || empty($array)) {
+			return NULL;
+		}
+		
+		return array_keys($array)[count($array)-1];
+	}
+}
+
 class ControllerExtensionModuleFsMonitor extends Controller {
 
 	private	$_route 			= 'extension/module/fs_monitor';
@@ -35,56 +45,20 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 	 * main section
 	 * @return void
 	 **/
-	public function index() {
+	public function getScans() {
 		$this->load->model($this->_route);
 		$data = $this->language->load($this->_route);
 
 		$this->humanizer = new Security\humanizer($this->registry);
 
-		$this->document->setTitle($this->language->get('heading_title'));
-		$data['panel_title']   = $this->language->get('text_fs_monitor');
-		$data['version'] = $this->_version;
-
-		$this->{$this->_model}->install(false);
-
-		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateScan()) {
-			if (!isset($this->request->post['scan_name']) || empty($this->request->post['scan_name'])) {
-				$this->session->data['error'] = $this->language->get('error_empty_name');
-				$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
-			}
-
-			$scan_id = $this->createScan($this->request->post['scan_name']);
-			
-			$this->session->data['success'] = $this->language->get('text_success_scan_created');
-			$this->response->redirect($this->url->link($this->_route, 'scan_id=' . (int) $scan_id . '&token=' . $this->session->data['token'], 'SSL'));
-		}
-
-		if (isset($this->session->data['error'])) {
-			$data['error_warning'] = $this->session->data['error'];
-
-			unset($this->session->data['error']);
-		} elseif (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
-
-		if (isset($this->session->data['success'])) {
-			$data['success'] = $this->session->data['success'];
-
-			unset($this->session->data['success']);
-		} else {
-			$data['success'] = '';
-		}
-
-		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+		if (isset($this->request->post['page'])) {
+			$page = $this->request->post['page'];
 		} else {
 			$page = 1;
 		}
 		
-		if (isset($this->request->get['limit'])) {
-			$limit = $this->request->get['limit'];
+		if (isset($this->request->post['limit'])) {
+			$limit = $this->request->post['limit'];
 		} else {
 			$limit = $this->config->get('config_limit_admin');
 		}
@@ -93,15 +67,6 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 			'start' => ($page - 1) * $limit,
 			'limit' => $limit
 		];
-
-		$pagination = new Pagination();
-		$pagination->total = $this->{$this->_model}->getTotalScans();
-		$pagination->page = $page;
-		$pagination->limit = $limit;
-		$pagination->text = $this->language->get('text_pagination');
-		$pagination->url = $this->url->link($this->_route, 'token=' . $this->session->data['token'] . '&page={page}', 'SSL');
-
-		$data['pagination'] = $pagination->render();
 
 		$scans = $this->{$this->_model}->getScans($filter_data);
 
@@ -123,347 +88,255 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 				setlocale(LC_TIME, explode(',', $language_data['locale']));
 			}
 		}
+		
+		$data['groups'] = $data['scans'] = [];
 
-		foreach ($scans as $key => $scan) {
+		foreach ($scans as $scan) {
 			$date_key = $this->language->get('text_scans_on') . ' ' . date('l jS \of F Y', strtotime($scan['date_added']));
 
-			$scan['scan_size_abs_humanized'] = $this->humanizer->humanBytes($scan['scan_size_abs']);
-			$scan['scan_size_rel_humanized'] = $this->humanizer->humanBytes($scan['scan_size_rel']);
+			$scan['scan_size_abs_humanized'] 	= $this->humanizer->humanBytes($scan['scan_size_abs']);
+			$scan['scan_size_rel_humanized'] 	= $this->humanizer->humanBytes($scan['scan_size_rel']);
 
-			$data['scans'][$date_key][$key]                   = $scan;
-			$data['scans'][$date_key][$key]['date_added_ago'] = $this->humanizer->humanDatePrecise($data['scans'][$date_key][$key]['date_added'], 'H:i:s');
-			$data['scans'][$date_key][$key]['href']           = $this->url->link($this->_route . '/viewScan', 'scan_id=' . $data['scans'][$date_key][$key]['scan_id'] . '&token=' . $this->session->data['token'], 'SSL');
+			$scan['date_added_ago'] 			= $this->humanizer->humanDatePrecise($scan['date_added'], 'F j H:i:s');
+
+			$scanKey = $scan['scan_id'];
+
+			$data['scans'][$scanKey] = $scan;
+			$group_key = $this->searchForKeyValue('name', $date_key, $data['groups']);
+			if ($group_key === false) {
+				$data['groups'][] = [
+					'name'	=> $date_key,
+					'children' => [],
+				];
+				$group_key = array_key_last($data['groups']);
+				$data['groups'][$group_key]['children'][] = $scanKey;
+			} else {
+				$data['groups'][$group_key]['children'][] = $scanKey;
+			}
 		}
 
-		$data['breadcrumbs'] = [];
-
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], 'SSL')
-		];
-	
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_modules'),
-			'href' => $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=module', 'SSL')
+		$data['pagination'] = [
+			'total' => $this->{$this->_model}->getTotalScans(),
+			'page' 	=> $page,
+			'limit' => $limit,
 		];
 
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL')
+		$result = [
+			'groups' 	 => $data['groups'], 
+			'scans' 	 => $data['scans'],
+			'pagination' => $data['pagination']
 		];
 
-		$data['action_scan']     = $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_init']     = $this->url->link($this->_route . '/init', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_settings'] = $this->url->link($this->_route . '/settings', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_delete']   = $this->url->link($this->_route . '/delete', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_cancel']   = $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=module', 'SSL');
-
-		$data['header'] = $this->load->controller('common/header');
-		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view($this->_route . '/main', $data));
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($result));
 	}
 
 	/**
 	 * view scan function
 	 * @return void
 	 **/
-	public function viewScan() {
+	public function getScan() {
 		$this->load->model($this->_route);
 		$data = $this->language->load($this->_route);
 
 		$this->humanizer = new Security\humanizer($this->registry);
 		
+		if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['scan_id'])) {
+			$scan_id = (int) $this->request->post['scan_id'];
+
+			$data['scan'] = $this->{$this->_model}->getScan($scan_id, true);
+			
+			if ($data['scan']) {
+				$scan_data = $data['scan']['scan_data'];
+				unset($data['scan']['scan_data']);
+				$scan_result = [];
+				if ($scan_data['scanned']) {
+					foreach ($scan_data['scanned'] as $file_name => $file_data) {
+						$scan_result['scanned'][$file_name] = $this->formatFile($file_name, $file_data);
+					}
+				}
+				if ($scan_data['new']) {
+					foreach ($scan_data['new'] as $file_name => $file_data) {
+						$scan_result['new'][$file_name] = $this->formatFile($file_name, $file_data);
+					}
+				}
+				if ($scan_data['changed']) {
+					foreach ($scan_data['changed'] as $file_name => $file_data) {
+						$postfix = '';
+						if (isset($file_data['diff']['filesize'])) {
+							if ($file_data['old']['filesize'] >= $file_data['new']['filesize']) {
+								$postfix = ' (+' . $this->humanizer->humanBytes(abs($file_data['new']['filesize'] - $file_data['old']['filesize'])) . ')';
+							} else {
+								$postfix = ' (-' . $this->humanizer->humanBytes(abs($file_data['new']['filesize'] - $file_data['old']['filesize'])) . ')';
+							}
+						}
+						$file_data['postfix'] = $postfix;
+						$scan_result['changed'][$file_name] = $this->formatFile($file_name, $file_data);
+					}
+				}
+				
+				if ($scan_data['deleted']) {
+					foreach ($scan_data['deleted'] as $file_name => $file_data) {
+						$scan_result['deleted'][$file_name] = $this->formatFile($file_name, $file_data);
+					}
+				}
+				$data['scan_id'] = $scan_id;
+				$data['scan']['scan_data'] = $scan_result;
+				$data['scan']['scan_size_abs_humanized'] = $this->humanizer->humanBytes($data['scan']['scan_size_abs']);
+				$data['scan']['scan_size_rel_humanized'] = $this->humanizer->humanBytes($data['scan']['scan_size_rel']);
+				$data['scan']['date_added_ago'] = $this->humanizer->humanDatePrecise($data['scan']['date_added'], 'F j H:i:s');
+				$data['scan']['href'] = $this->url->link($this->_route . '/viewScan', 'scan_id=' . $data['scan']['scan_id'] . '&token=' . $this->session->data['token'], 'SSL');
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($data['scan']));
+			} else {
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode(['error' => $this->language->get('error_scan_doesnt_exists')]));				
+			}
+		}
+	}
+	
+	public function addScan() {
+		$this->load->model($this->_route);
+		$this->language->load($this->_route);
+		if ($this->request->server['REQUEST_METHOD'] == 'POST' && isset($this->request->post['scan_name']) && $this->user->hasPermission('modify', $this->_route)) {
+			$scan_id = $this->createScan($this->request->post['scan_name']);
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($scan_id));
+		} else {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(['error' => $this->language->get('error_scan_doesnt_exists')]));
+		}
+	}
+
+	public function deleteScans() {
+		$this->load->model($this->_route);
+		$this->language->load($this->_route);
+
+		$this->fs_scans = new Security\fs_scans();
+
+		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->request->post['scans'] && $this->user->hasPermission('modify', $this->_route)) {
+			foreach ($this->request->post['scans'] as $key => $value) {
+				$this->{$this->_model}->deleteScan((int) $value);
+			}
+			$response['success'] = $this->language->get('text_success_scans_deleted');
+		} else {
+			$response['error'] = $this->language->get('error_permission');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($response));
+	}
+
+	public function renameScan() {
+		$this->load->model($this->_route);
+		$this->language->load($this->_route);
+
+		if ($this->user->hasPermission('modify', $this->_route)) {
+			if (isset($this->request->post['scan_name']) && !empty($this->request->post['scan_name'])) {
+				$scan_name = $this->request->post['scan_name'];
+				$this->{$this->_model}->rename((int)$this->request->post['scan_id'], $scan_name);
+
+				$response['success'] = $this->language->get('text_success_renamed');
+			} else {
+				$response['error'] = $this->language->get('error_empty_name');
+			}
+		} else {
+			$response['error'] = $this->language->get('error_permission');
+		}
+		
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($data));
+	}
+
+	public function getSettings() {
+		$response['settings'] = [
+			'security_fs_admin_dir' 			=> $this->config->get('security_fs_admin_dir'),
+			'security_fs_base_path' 			=> $this->config->get('security_fs_base_path'),
+			'security_fs_extensions' 			=> $this->config->get('security_fs_extensions'),
+			'security_fs_include' 				=> $this->config->get('security_fs_include'),
+			'security_fs_exclude' 				=> $this->config->get('security_fs_exclude'),
+			'security_fs_cron_access_key' 		=> $this->config->get('security_fs_cron_access_key'),
+			'security_fs_cron_save' 			=> $this->config->get('security_fs_cron_save'),
+			'security_fs_cron_notify' 			=> $this->config->get('security_fs_cron_notify'),
+
+			'security_fs_notify_to' 			=> $this->config->get('security_fs_notify_to'),
+			'security_fs_e_emails' 				=> $this->config->get('security_fs_e_emails'),
+			'security_fs_w_phone_number' 		=> $this->config->get('security_fs_w_phone_number'),
+			'security_fs_w_business_account_id' => $this->config->get('security_fs_w_business_account_id'),
+			'security_fs_w_api_token' 			=> $this->config->get('security_fs_w_api_token'),
+			'security_fs_t_api_token' 			=> $this->config->get('security_fs_t_api_token'),
+			'security_fs_t_channel_id' 			=> $this->config->get('security_fs_t_channel_id'),
+		];
+		
+		$response['entries'] = [
+			'security_fs_cron_wget' => '/usr/local/bin/wget -q -O- \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=',
+			'security_fs_cron_curl' => '/usr/local/bin/curl -s \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=',
+			'security_fs_cron_cli'  => '/usr/local/bin/php -q \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', DIR_APPLICATION) . 'index.php?route=' . $this->_route . '&access_key='
+		];
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($response));
+	}
+
+	public function saveSettings() {
+		$data = $this->language->load($this->_route);
+		
+		$this->load->model('setting/setting');
+		if (($this->request->server['REQUEST_METHOD'] == 'POST')) {
+			$this->model_setting_setting->editSetting('security_fs', $this->request->post);
+			$response['success'] = $this->language->get('text_success_saved');
+		} else {
+			$response['error'] = $this->language->get('error_permission');
+		}
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($response));
+	}
+	
+	
+	public function index() {
+		$data = $this->language->load($this->_route);
+
 		$this->document->setTitle($this->language->get('heading_title'));
-		$data['panel_title']     = $this->language->get('text_view');
-		$data['version'] = $this->_version;
 
 		$this->document->addStyle('//cdn.jsdelivr.net/npm/sortable-tablesort@2.1.1/sortable.min.css');
 		$this->document->addScript('//cdn.jsdelivr.net/npm/sortable-tablesort@2.1.1/sortable.min.js');
 
-		if (isset($this->session->data['error'])) {
-			$data['error_warning'] = $this->session->data['error'];
-			unset($this->session->data['error']);
-		} elseif (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
+		$this->load->model($this->_route);
+		$this->{$this->_model}->install(false);
 
-		if (isset($this->session->data['success'])) {
-			$data['success'] = $this->session->data['success'];
-			unset($this->session->data['success']);
-		} else {
-			$data['success'] = '';
-		}
+		$breadcrumbs = [];
 
-		if (isset($this->request->get['scan_id'])) {
-			$data['scan'] = $this->{$this->_model}->getScan((int) $this->request->get['scan_id'], true);
-		} else {
-			$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
-		}
-
-		$scan_data = $data['scan']['scan_data'];
-		unset($data['scan']['scan_data']);
-
-		$scan_result = [];
-
-		if ($scan_data['scanned']) {
-			foreach ($scan_data['scanned'] as $file_name => $file_data) {
-				$scan_result['scanned'][$file_name] = $this->formatFile($file_name, $file_data);
-			}
-		}
-
-		if ($scan_data['new']) {
-			foreach ($scan_data['new'] as $file_name => $file_data) {
-				$scan_result['new'][$file_name] = $this->formatFile($file_name, $file_data);
-			}
-		}
-
-		if ($scan_data['changed']) {
-			foreach ($scan_data['changed'] as $file_name => $file_data) {
-				$postfix = '';
-				if (isset($file_data['diff']['filesize'])) {
-					if ($file_data['old']['filesize'] >= $file_data['new']['filesize']) {
-						$postfix = ' (+' . $this->humanizer->humanBytes(abs($file_data['new']['filesize'] - $file_data['old']['filesize'])) . ')';
-					} else {
-						$postfix = ' (-' . $this->humanizer->humanBytes(abs($file_data['new']['filesize'] - $file_data['old']['filesize'])) . ')';
-					}
-				}
-				$file_data['postfix'] = $postfix;
-				$scan_result['changed'][$file_name] = $this->formatFile($file_name, $file_data);
-			}
-		}
-		
-		if ($scan_data['deleted']) {
-			foreach ($scan_data['deleted'] as $file_name => $file_data) {
-				$scan_result['deleted'][$file_name] = $this->formatFile($file_name, $file_data);
-			}
-		}
-
-		$data['scan']['scan_data'] = $scan_result;
-		$data['scan']['scan_size_abs_humanized'] = $this->humanizer->humanBytes($data['scan']['scan_size_abs']);
-		$data['scan']['scan_size_rel_humanized'] = $this->humanizer->humanBytes($data['scan']['scan_size_rel']);
-		$data['scan']['date_added_ago'] = $this->humanizer->humanDatePrecise($data['scan']['date_added'], 'F j H:i:s');
-		$data['scan']['href'] = $this->url->link($this->_route . '/viewScan', 'scan_id=' . $data['scan']['scan_id'] . '&token=' . $this->session->data['token'], 'SSL');
-
-		$data['token'] = $this->session->data['token'];
-
-		$data['breadcrumbs'] = [];
-		
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], 'SSL')
-		];
-		
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_modules'),
-			'href' => $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=module', 'SSL')
-		];
-		
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL')
-		];
-		
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_view'),
-			'href' => $this->url->link($this->_route . '/viewScan', 'scan_id=' . $data['scan']['scan_id'] . '&token=' . $this->session->data['token'], 'SSL')
-		];
-
-		$data['action_cancel']   = $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_settings'] = $this->url->link($this->_route . '/settings', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_file']     = $this->url->link($this->_route . '/viewFile', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_rename']   = $this->url->link($this->_route . '/rename', 'scan_id=' . (int) $data['scan']['scan_id'] . '&token=' . $this->session->data['token'], 'SSL');
-
-		$data['header'] = $this->load->controller('common/header');
-		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view($this->_route . '/view_scan', $data));
-	}
-
-	/**
-	 * settings section
-	 * @return void
-	 **/
-	public function settings() {
-		$data = $this->language->load($this->_route);
-
-		$this->document->setTitle($this->language->get('heading_title') . ' - ' . $this->language->get('text_settings'));
-		$data['panel_title']   = $this->language->get('text_settings');
-		$data['version'] = $this->_version;
-		
-		$this->load->model('setting/setting');
-
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateSettings()) {
-			$this->model_setting_setting->editSetting('security_fs', $this->request->post);
-
-			$this->session->data['success'] = $this->language->get('text_success_saved');
-			$this->response->redirect($this->url->link($this->_route . '/settings', 'token=' . $this->session->data['token'], true));
-		}
-
-		if (isset($this->session->data['error'])) {
-			$data['error_warning'] = $this->session->data['error'];
-			unset($this->session->data['error']);
-		} elseif (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
-
-		if (isset($this->session->data['success'])) {
-			$data['success'] = $this->session->data['success'];
-			unset($this->session->data['success']);
-		} else {
-			$data['success'] = '';
-		}
-
-		if (isset($this->error['base_path'])) {
-			$data['error_base_path'] = $this->error['base_path'];
-		} else {
-			$data['error_base_path'] = '';
-		}
-
-		if (isset($this->error['extensions'])) {
-			$data['error_extensions'] = $this->error['extensions'];
-		} else {
-			$data['error_extensions'] = '';
-		}
-
-		if (isset($this->error['access_key'])) {
-			$data['error_access_key'] = $this->error['access_key'];
-		} else {
-			$data['error_access_key'] = '';
-		}
-
-		if (isset($this->request->post['security_fs_admin_dir'])) {
-			$data['security_fs_admin_dir'] = $this->request->post['security_fs_admin_dir'];
-		} else {
-			$data['security_fs_admin_dir'] = $this->config->get('security_fs_admin_dir');
-		}
-
-		if (isset($this->request->post['security_fs_base_path'])) {
-			$data['security_fs_base_path'] = $this->request->post['security_fs_base_path'];
-		} else {
-			$data['security_fs_base_path'] = $this->config->get('security_fs_base_path');
-		}
-
-		if (isset($this->request->post['security_fs_extensions'])) {
-			$data['security_fs_extensions'] = $this->request->post['security_fs_extensions'];
-		} else {
-			$data['security_fs_extensions'] = $this->config->get('security_fs_extensions');
-		}
-
-		if (isset($this->request->post['security_fs_include'])) {
-			$data['security_fs_include'] = $this->request->post['security_fs_include'];
-		} else {
-			$data['security_fs_include'] = $this->config->get('security_fs_include');
-		}
-
-		if (isset($this->request->post['security_fs_exclude'])) {
-			$data['security_fs_exclude'] = $this->request->post['security_fs_exclude'];
-		} else {
-			$data['security_fs_exclude'] = $this->config->get('security_fs_exclude');
-		}
-
-		if (isset($this->request->post['security_fs_cron_access_key'])) {
-			$data['security_fs_cron_access_key'] = $this->request->post['security_fs_cron_access_key'];
-		} else {
-			$data['security_fs_cron_access_key'] = $this->config->get('security_fs_cron_access_key');
-		}
-
-		if (isset($this->request->post['security_fs_cron_save'])) {
-			$data['security_fs_cron_save'] = $this->request->post['security_fs_cron_save'];
-		} else {
-			$data['security_fs_cron_save'] = $this->config->get('security_fs_cron_save');
-		}
-
-		if (isset($this->request->post['security_fs_cron_notify'])) {
-			$data['security_fs_cron_notify'] = $this->request->post['security_fs_cron_notify'];
-		} else {
-			$data['security_fs_cron_notify'] = $this->config->get('security_fs_cron_notify');
-		}
-
-		if (isset($this->request->post['security_fs_notify_to'])) {
-			$data['security_fs_notify_to'] = $this->request->post['security_fs_notify_to'];
-		} else {
-			$data['security_fs_notify_to'] = $this->config->get('security_fs_notify_to');
-		}
-
-		if (isset($this->request->post['security_fs_e_emails'])) {
-			$data['security_fs_e_emails'] = $this->request->post['security_fs_e_emails'];
-		} else {
-			$data['security_fs_e_emails'] = $this->config->get('security_fs_e_emails');
-		}
-
-		if (isset($this->request->post['security_fs_w_phone_number'])) {
-			$data['security_fs_w_phone_number'] = $this->request->post['security_fs_w_phone_number'];
-		} else {
-			$data['security_fs_w_phone_number'] = $this->config->get('security_fs_w_phone_number');
-		}
-
-		if (isset($this->request->post['security_fs_w_business_account_id'])) {
-			$data['security_fs_w_business_account_id'] = $this->request->post['security_fs_w_business_account_id'];
-		} else {
-			$data['security_fs_w_business_account_id'] = $this->config->get('security_fs_w_business_account_id');
-		}
-
-		if (isset($this->request->post['security_fs_w_api_token'])) {
-			$data['security_fs_w_api_token'] = $this->request->post['security_fs_w_api_token'];
-		} else {
-			$data['security_fs_w_api_token'] = $this->config->get('security_fs_w_api_token');
-		}
-
-		if (isset($this->request->post['security_fs_t_api_token'])) {
-			$data['security_fs_t_api_token'] = $this->request->post['security_fs_t_api_token'];
-		} else {
-			$data['security_fs_t_api_token'] = $this->config->get('security_fs_t_api_token');
-		}
-
-		if (isset($this->request->post['security_fs_t_channel_id'])) {
-			$data['security_fs_t_channel_id'] = $this->request->post['security_fs_t_channel_id'];
-		} else {
-			$data['security_fs_t_channel_id'] = $this->config->get('security_fs_t_channel_id');
-		}
-
-		$data['security_fs_cron_wget'] = '/usr/local/bin/wget -q -O- \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
-		$data['security_fs_cron_curl'] = '/usr/local/bin/curl -s \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', HTTP_SERVER) . 'index.php?route=' . $this->_route . '&access_key=';
-		$data['security_fs_cron_cli']  = '/usr/local/bin/php -q \'' . str_replace($this->config->get('security_fs_admin_dir') . '/', '', DIR_APPLICATION) . 'index.php?route=' . $this->_route . '&access_key=';
-
-		$data['breadcrumbs'] = [];
-
-		$data['breadcrumbs'][] = [
+		$breadcrumbs[] = [
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], 'SSL')
 		];
 
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_modules'),
-			'href' => $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=module', 'SSL')
+		$breadcrumbs[] = [
+				'text' => $this->language->get('text_modules'),
+				'href' => $this->url->link($this->_extensions_route, 'token=' . $this->session->data['token'] . '&type=module', 'SSL')
+			];
+	
+		$breadcrumbs[] = [
+				'text' => $this->language->get('heading_title'),
+				'href' => $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL')
 		];
-
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL')
-		];
-		
-		$data['breadcrumbs'][] = [
-			'text' => $this->language->get('text_settings'),
-			'href' => $this->url->link($this->_route . '/settings', 'token=' . $this->session->data['token'], 'SSL')
-		];
-
-		$data['action_cancel']   = $this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_generate'] = $this->url->link($this->_route . '/generateDefaultSettings', 'token=' . $this->session->data['token'], 'SSL');
-		$data['action_save']     = $this->url->link($this->_route . '/settings', 'token=' . $this->session->data['token'], 'SSL');
-
+	
+		$data['initial_data'] = json_encode([
+			'api_entry' 	=> $this->_route,
+			'token' 		=> $this->session->data['token'],
+			'breadcrumbs' 	=> $breadcrumbs,
+			'i18n' 			=> $data,
+			'app_container'	=> '#fsm',
+			'version'		=> $this->_version
+		]);
+	
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view($this->_route . '/settings', $data));
+		
+		$this->response->setOutput($this->load->view($this->_route . '/main', $data));
 	}
+ 
 
 	/**
 	 * view file section
@@ -476,16 +349,13 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 
 		if ($this->user->hasPermission('modify', $this->_route)) {
 
-			if (isset($this->request->get['file_name'])) {
-				$file_name = urldecode($this->request->get['file_name']);
+			if (isset($this->request->post['file_name'])) {
+				$file_name = urldecode($this->request->post['file_name']);
 				if (file_exists($file_name) && is_file($file_name)) {
-					$data['content'] = file_get_contents($file_name);
+					$response['content'] = file_get_contents($file_name);
+				} else {
+					$response['error'] = $this->language->get('file_doesnt_exists');
 				}
-			}
-
-			if (empty($data['content'])) {
-				$this->session->data['error'] = $this->language->get('error_permission');
-				$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
 			}
 
 			switch (pathinfo($file_name, PATHINFO_EXTENSION)) {
@@ -499,29 +369,30 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 				case 'phps':
 				case 'phtm':
 				case 'phtml':
-					$data['mode'] = 'php';
+					$response['mode'] = 'php';
 					break;
 				case 'twig':
-					$data['mode'] = 'twig';
+					$response['mode'] = 'twig';
 					break;
 				case 'css':
-					$data['mode'] = 'css';
+					$response['mode'] = 'css';
 					break;
 				case 'js':
-					$data['mode'] = 'javascript';
+					$response['mode'] = 'javascript';
 					break;
 				default:
-					$data['mode'] = 'php';
+					$response['mode'] = 'php';
 					break;
 			}
 
 			$data['heading_title'] = $file_name;
 
-			$this->response->setOutput($this->load->view($this->_route . '/view_file', $data));
 		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-			$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
+			$response['error'] = $this->language->get('error_permission');
 		}
+		
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($response));
 	}
 
 	/**
@@ -576,32 +447,6 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 	}
 
 	/**
-	 * rename scan
-	 * @return void
-	 **/
-	public function rename() {
-		$this->load->model($this->_route);
-		$this->language->load($this->_route);
-
-		if ($this->user->hasPermission('modify', $this->_route)) {
-			if (isset($this->request->post['scan_name']) && !empty($this->request->post['scan_name'])) {
-				$scan_name = $this->request->post['scan_name'];
-				$this->{$this->_model}->rename((int)$this->request->get['scan_id'], $scan_name);
-
-				$this->session->data['success'] = $this->language->get('text_success_renamed');
-				$this->response->redirect($this->url->link($this->_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&token=' . $this->session->data['token'], true));
-			} else {
-				$this->session->data['error'] = $this->language->get('error_empty_name');
-				$this->response->redirect($this->url->link($this->_route . '/viewScan',  'scan_id=' . (int)$this->request->get['scan_id'] . '&token=' . $this->session->data['token'], true));
-			}
-
-		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-			$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
-		}
-	}
-
-	/**
 	 * delete scan
 	 * @return void
 	 **/
@@ -616,13 +461,13 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 				$this->{$this->_model}->deleteScan((int) $value);
 			}
 
-			$this->session->data['success'] = $this->language->get('text_success_scans_deleted');
-			$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
+			$response['success'] = $this->language->get('text_success_saved');
 		} else {
-			$this->session->data['error'] = $this->language->get('error_permission');
-			$this->response->redirect($this->url->link($this->_route, 'token=' . $this->session->data['token'], 'SSL'));
+			$response['error'] = $this->language->get('error_permission');
 		}
 
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($response));
 	}
 
 	/**
@@ -759,5 +604,14 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 					'int_filectime' => $file_data['filectime']
 			];
 		}
+	}
+	
+	private static function searchForKeyValue($searchKey, $searchValue, $array) {
+		foreach ($array as $key => $value) {
+			if ($value[$searchKey] === $searchValue) {
+				return $key;
+			}
+		}
+		return false;
 	}
 }

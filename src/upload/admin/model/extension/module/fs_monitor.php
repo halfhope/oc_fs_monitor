@@ -61,7 +61,9 @@ class ModelExtensionModuleFSMonitor extends Model {
 	public function getScan($scan_id, $full = false) {
 		if ($full) {
 			$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg LEFT JOIN `" . DB_PREFIX . "security_filesystem_monitor_data` sfmd ON sfmd.scan_id = sfmg.scan_id WHERE sfmg.scan_id = " . (int) $scan_id);
-			$result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
+			if ($result->num_rows) {
+				$result->row['scan_data'] = $this->unpack_data($result->row['scan_data']);
+			}
 		} else {
 			$result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "security_filesystem_monitor_generated` AS sfmg WHERE scan_id = " . (int) $scan_id);
 		}
