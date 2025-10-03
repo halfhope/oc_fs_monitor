@@ -98,7 +98,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 		$pagination->total = $this->{$this->_model}->getTotalScans();
 		$pagination->page = $page;
 		$pagination->limit = $limit;
-		$pagination->text = $this->language->get('text_pagination');
+		// $pagination->text = $this->language->get('text_pagination');
 		$pagination->url = $this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'] . '&page={page}', 'SSL');
 
 		$data['pagination'] = $pagination->render();
@@ -120,7 +120,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 
 		foreach ($languages as $language_data) {
 			if ($language_data['code'] == $current_language_code) {
-				setlocale(LC_TIME, explode(',', $language_data['locale']));
+				setlocale(LC_TIME, explode(',', $language_data['locale'] ?? ''));
 			}
 		}
 
@@ -368,6 +368,12 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 			$data['security_fs_exclude'] = $this->config->get('security_fs_exclude');
 		}
 
+		if (isset($this->request->post['security_fs_enable_tree_storage'])) {
+			$data['security_fs_enable_tree_storage'] = $this->request->post['security_fs_enable_tree_storage'];
+		} else {
+			$data['security_fs_enable_tree_storage'] = $this->config->get('security_fs_enable_tree_storage');
+		}
+
 		if (isset($this->request->post['security_fs_cron_access_key'])) {
 			$data['security_fs_cron_access_key'] = $this->request->post['security_fs_cron_access_key'];
 		} else {
@@ -457,6 +463,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 		$data['action_cancel']   = $this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'], 'SSL');
 		$data['action_generate'] = $this->url->link($this->_route . '/generateDefaultSettings', 'user_token=' . $this->session->data['user_token'], 'SSL');
 		$data['action_save']     = $this->url->link($this->_route . '/settings', 'user_token=' . $this->session->data['user_token'], 'SSL');
+		$data['action_get_tree_storage_size'] = html_entity_decode($this->url->link($this->_route . '/getTreeStorageSize', 'user_token=' . $this->session->data['user_token'], 'SSL'), ENT_QUOTES, 'UTF-8');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -481,41 +488,58 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 				if (file_exists($file_name) && is_file($file_name)) {
 					$data['content'] = file_get_contents($file_name);
 				}
-			}
 
-			if (empty($data['content'])) {
+				$extension = pathinfo($file_name, PATHINFO_EXTENSION);
+				$data['mode'] = 'ace/mode/' . $this->getAceMode($extension);
+
+			} elseif (isset($this->request->get['sha1'])) {
+				$tree_storage_directory = DIR_SYSTEM . implode(DIRECTORY_SEPARATOR, ['storage', 'tree_storage']);
+				self::createDirectory($tree_storage_directory);
+				$this->tree_storage = new Security\tree_storage($tree_storage_directory);
+				
+				$extension = isset($this->request->get['extension']) ? $this->request->get['extension'] : 'php';
+				
+				$shas = explode(',', $this->request->get['sha1'] ?? '');
+
+				if (count($shas) === 2) {
+					list($sha1_new, $sha1_old) = $shas;
+					
+					$data['ace_diff_config'] = json_encode([
+						'element' => '#acediff',
+						'theme' => 'ace/theme/chrome',
+						'mode' => 'ace/mode/' . $extension,
+						'diffGranularity' => 'broad',
+						'showDiffs' => true,
+						'showConnectors' => true,
+						'maxDiffs' => 5000,
+						'left' => [
+							'content' => $this->tree_storage->get($sha1_old),
+							'editable' => false,
+							'copyLinkEnabled' => false,
+						],
+						'right' => [
+							'content' => $this->tree_storage->get($sha1_new),
+							'editable' => false,
+							'copyLinkEnabled' => false,
+						],
+						'classes' => [
+							'diff' => 'acediff__diffLine',
+							'connector' => 'acediff__connector',
+							'newCodeConnectorLinkContent' => '&#8594;',
+							'deletedCodeConnectorLinkContent' => '&#8592;'
+						],
+					]);
+				} else {
+					$data['content'] = $this->tree_storage->get(end($shas));
+					$data['mode'] = 'ace/mode/' . $extension;
+				}
+			} else {
 				$this->session->data['error'] = $this->language->get('error_permission');
 				$this->response->redirect($this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
 			}
 
-			switch (pathinfo($file_name, PATHINFO_EXTENSION)) {
-				case 'php5':
-				case 'php42':
-				case 'php4':
-				case 'php3':
-				case 'php':
-				case 'tpl':
-				case 'phpt':
-				case 'phps':
-				case 'phtm':
-				case 'phtml':
-					$data['mode'] = 'php';
-					break;
-				case 'twig':
-					$data['mode'] = 'twig';
-					break;
-				case 'css':
-					$data['mode'] = 'css';
-					break;
-				case 'js':
-					$data['mode'] = 'javascript';
-					break;
-				default:
-					$data['mode'] = 'php';
-					break;
-			}
-
-			$data['heading_title'] = $file_name;
+			$data['heading_title'] 				= $this->language->get('text_view_file');
+			$data['text_synchronized_scroll'] 	= $this->language->get('text_synchronized_scroll');
 
 			$this->response->setOutput($this->load->view($this->_route . '/view_file', $data));
 		} else {
@@ -636,22 +660,41 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 		$this->directory_scanner = new Security\directory_scanner();
 		$this->fs_scans = new Security\fs_scans();
 		
+		$tree_storage_directory = DIR_SYSTEM . implode(DIRECTORY_SEPARATOR, ['storage', 'tree_storage']);
+		self::createDirectory($tree_storage_directory);
+		$this->tree_storage = new Security\tree_storage($tree_storage_directory);
+		
 		// add include paths
-		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
+		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include') ?? ''));
 		$include_paths[] = $this->config->get('security_fs_base_path');
 		$this->directory_scanner->setIncludePaths($include_paths);
 		
 		// add exclude paths
-		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
+		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude') ?? ''));
 		$this->directory_scanner->setExcludePaths($exclude_paths);
 		
 		// add default replace path
 		$this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
 		
 		// add extensions
-		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
+		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions') ?? '')));
 
 		$files = $this->directory_scanner->getFiles();
+		
+		if ($this->config->get('security_fs_enable_tree_storage')) {
+			// append files into storage 
+			foreach ($files as $file_path => $file_data) {
+				$content = file_get_contents($file_path);
+				$hash = hash('sha1', $content);
+				
+				if (!$this->tree_storage->is_exists($hash)) {
+					$this->tree_storage->set($hash, $content);
+				}
+				
+				$files[$file_path]['sha1'] = $hash;
+			}
+		}
+		
 		$scan_size = $this->fs_scans->getScanSize($files);
 		$scan_id = $this->{$this->_model}->addScan($name, $files, $scan_size);
 
@@ -675,6 +718,31 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 			$this->session->data['error'] = $this->language->get('error_permission');
 			$this->response->redirect($this->url->link($this->_route, 'user_token=' . $this->session->data['user_token'], 'SSL'));
 		}
+	}
+
+	/**
+	 * get tree_storage size
+	 * @return string
+	 **/
+	public function getTreeStorageSize() {
+		$this->language->load($this->_route);
+
+		$this->humanizer = new Security\humanizer($this->registry);
+
+		$tree_storage_directory = DIR_SYSTEM . implode(DIRECTORY_SEPARATOR, ['storage', 'tree_storage']);
+		self::createDirectory($tree_storage_directory);		
+
+		$treeStorageSize = $this->humanizer->humanBytes(self::folderSize($tree_storage_directory));
+
+		$json = [];
+		if ($this->user->hasPermission('access', $this->_route)) {
+			$json['success'] = sprintf($this->language->get('text_tree_storage_size'), $treeStorageSize);
+		} else {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	/**
@@ -732,7 +800,11 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 	 **/
 	private function formatFile($file_name, $file_data) {
 		if (isset($file_data['diff'])) { //changed
-			return [
+			if (isset($file_data['diff']['sha1']) && isset($file_data['new']['sha1']) && isset($file_data['old']['sha1'])) {
+				$file_data['diff']['sha1'] = [$file_data['new']['sha1'], $file_data['old']['sha1']];
+			}
+			
+			$file = [
 				'filesize' => $this->humanizer->humanBytes($file_data['new']['filesize']) . $file_data['postfix'],
 				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
 				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
@@ -745,8 +817,14 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 					'int_filectime' => $file_data['new']['filectime'],
 				'diff' => $file_data['diff']
 			];
+			
+			if (isset($file_data['new']['sha1'])) {
+				$file['sha1'] = $file_data['new']['sha1'];
+			}
+
+			return $file;
 		} else {
-			return [
+			$file = [
 				'filesize' => $this->humanizer->humanBytes($file_data['filesize']),
 				'relpath' => str_replace(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR, '', $file_name),
 				'extension' => pathinfo($file_name, PATHINFO_EXTENSION),
@@ -758,6 +836,90 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 					'int_filemtime' => $file_data['filemtime'],
 					'int_filectime' => $file_data['filectime']
 			];
+
+			if (isset($file_data['sha1'])) {
+				$file['sha1'] = $file_data['sha1'];
+			}
+
+			return $file;
+		}
+	}
+
+	private function getAceMode($extension) {
+		
+		switch ($extension) {
+			case 'php5':
+			case 'php42':
+			case 'php4':
+			case 'php3':
+			case 'php':
+			case 'tpl':
+			case 'phpt':
+			case 'phps':
+			case 'phtm':
+			case 'phtml':
+				$result = 'php';
+				break;
+			case 'twig':
+				$result = 'twig';
+				break;
+			case 'css':
+				$result = 'css';
+				break;
+			case 'js':
+				$result = 'javascript';
+				break;
+			default:
+				$result = 'php';
+				break;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * recursive calculate directory size in bytes
+	 * @param 	string 	$dir
+	 * @return 	int
+	 **/
+	public static function folderSize($dir) {
+		if (!is_dir($dir)) {
+			return 0;
+		}
+		
+		$size = 0;
+		$iterator = new DirectoryIterator($dir);
+		
+		foreach ($iterator as $fileinfo) {
+			if ($fileinfo->isDot()) {
+				continue;
+			}
+			
+			if ($fileinfo->isDir()) {
+				$size += self::folderSize($fileinfo->getPathname());
+			} else {
+				$size += $fileinfo->getSize();
+			}
+		}
+		
+		return $size;
+	}
+
+	/**
+	 * recursive create directory
+	 * @param 	string 	$path
+	 * @param 	int 	$permissions
+	 * @return 	bool
+	 **/
+	public static function createDirectory($path, $permissions = 0755) {
+		if (is_dir($path)) {
+			return true;
+		}
+		
+		if (mkdir($path, $permissions, true)) {
+			return true;
+		} else {
+			throw new \Exception("Can't create directory: " . $path);
 		}
 	}
 }
