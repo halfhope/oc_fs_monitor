@@ -1,5 +1,9 @@
 <?php echo $header; ?>
-<style>.form-group+.form-group{border:none}</style>
+<style>
+.form-group+.form-group{border:none}
+.ajax-message{display:inline-block}
+.ajax-message>.label{position:relative;top:6px;left:10px;font-size:unset}
+</style>
 <?php echo $column_left; ?>
 <div id="content">
 	<div class="page-header">
@@ -87,6 +91,38 @@
 								<div class="help-block"><?php echo $entry_exclude_help_block; ?></div>
 							</div>
 						</div>
+						
+					</fieldset>
+
+					<fieldset>
+
+						<legend><?php echo $text_legend_tree_storage ?></legend>
+
+						<div class="form-group">
+							<label class="col-sm-2 control-label"><span data-toggle="tooltip" title="<?php echo $entry_enable_tree_storage_help; ?>"><?php echo $entry_enable_tree_storage; ?></span></label>
+							<div class="col-sm-10">
+								<label class="radio-inline">
+									<?php if ($security_fs_enable_tree_storage) { ?>
+									<input type="radio" name="security_fs_enable_tree_storage" value="1" checked="checked" />
+									<?php echo $text_yes; ?>
+									<?php } else { ?>
+									<input type="radio" name="security_fs_enable_tree_storage" value="1" />
+									<?php echo $text_yes; ?>
+									<?php } ?>
+								</label>
+								<label class="radio-inline">
+									<?php if (!$security_fs_enable_tree_storage) { ?>
+									<input type="radio" name="security_fs_enable_tree_storage" value="0" checked="checked" />
+									<?php echo $text_no; ?>
+									<?php } else { ?>
+									<input type="radio" name="security_fs_enable_tree_storage" value="0" />
+									<?php echo $text_no; ?>
+									<?php } ?>
+								</label>
+								<div class="ajax-message"></div>
+							</div>
+						</div>
+
 					</fieldset>
 
 					<fieldset>
@@ -274,6 +310,17 @@ $(document).ready(function($) {
 		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
 
 	}).trigger('change');
+
+	$.ajax({
+		type: "POST",
+		url: "<?php echo $action_get_tree_storage_size; ?>",
+		dataType: "json",
+		success: function (response) {
+			if (response.success) {
+				$('.ajax-message').append('<div class="label label-success">' + response.success + '</div>');
+			}
+		}
+	});
 });
 </script>
 <?php echo $footer; ?>

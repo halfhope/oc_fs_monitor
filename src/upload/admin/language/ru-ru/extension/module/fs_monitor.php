@@ -24,9 +24,15 @@ $_['text_view_all']              = 'Смотреть все';
 $_['text_dashboard_scan']        = 'Панель управления';
 $_['text_initial_scan']          = 'Первичное';
 $_['text_date_format_short']     = 'd.m.Y';
+$_['text_tree_storage_size']     = 'Текущий размер хранилища: %s';
+
+// View file
+$_['text_view_file']             = 'Просмотр файла';
+$_['text_synchronized_scroll']   = 'Синхронизировать прокрутку';
 
 $_['text_legend_module']  = 'Модуль';
 $_['text_legend_scanner'] = 'Сканер';
+$_['text_legend_tree_storage'] = 'Хранилище кода';
 $_['text_legend_cron']    = 'Cron (автосканирование)';
 $_['text_legend_notify']  = 'Уведомления';
 
@@ -51,6 +57,8 @@ $_['entry_include_help_block']  = 'Можно использовать толь�
 $_['entry_exclude']          	= 'Исключить директории или файлы';
 $_['entry_exclude_help']     	= 'Каждый путь на новой строке. Папки и файлы, по маске.';
 $_['entry_exclude_help_block']  = 'Можно использовать как абсолютные, так и относительные пути к папкам и файлам с маской.<br>Например:<ul><li>/var/www/username/www-data/other_sitename.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+$_['entry_enable_tree_storage'] = 'Включить хранилище для файлов';
+$_['entry_enable_tree_storage_help'] = 'Все файлы будут сжаты и помещены в папку system/storage/tree_storage. Это дает возможность просматривать изменения в файлах.';
 $_['entry_cron_access_key']  	= 'Пароль доступа к cron скрипту';
 $_['entry_cron_wget']        	= 'wget';
 $_['entry_cron_curl']        	= 'curl';

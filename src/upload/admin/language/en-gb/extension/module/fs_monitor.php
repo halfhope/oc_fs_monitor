@@ -24,11 +24,17 @@ $_['text_view_all']              = 'View all';
 $_['text_dashboard_scan']        = 'Dashboard';
 $_['text_initial_scan']          = 'Initial';
 $_['text_date_format_short']     = 'F j';
+$_['text_tree_storage_size']     = 'Current storage size: %s';
 
 $_['text_legend_module']  = 'Module';
 $_['text_legend_scanner'] = 'Scanner';
+$_['text_legend_tree_storage'] = 'Code storage';
 $_['text_legend_cron']    = 'Cron';
 $_['text_legend_notify']  = 'Notifications';
+
+// View file
+$_['text_view_file']             = 'View file';
+$_['text_synchronized_scroll']   = 'Synchronize scroll';
 
 // Columns
 $_['text_column_name']   = 'Name';
@@ -51,6 +57,8 @@ $_['entry_include_help_block']  = 'Only absolute paths to folders without a mask
 $_['entry_exclude']          	= 'Exclude directories and files';
 $_['entry_exclude_help']     	= 'Each path is on a new line. Folders and files.';
 $_['entry_exclude_help_block']  = 'You can use both absolute and relative paths to folders and files with or without a mask.<br>For example:<ul><li>/var/www/username/www-data/other_sitename.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+$_['entry_enable_tree_storage'] = 'Enable code storage for files';
+$_['entry_enable_tree_storage_help'] = 'All files will be compressed and placed in the system/storage/tree_storage folder. This allows viewing changes in files.';
 $_['entry_cron_access_key']  	= 'Access password to the cron script';
 $_['entry_cron_wget']           = 'wget';
 $_['entry_cron_curl']           = 'curl';

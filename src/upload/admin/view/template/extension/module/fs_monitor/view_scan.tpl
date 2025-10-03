@@ -4,7 +4,7 @@
 	.scan-name{cursor:pointer}
 	span.label{font-size:10pt}
 	table.table-security{table-layout:fixed}
-	table.table-security *{font-family:Consolas;font-size:9pt}
+	table.table-security {font-family:Consolas;font-size:9pt}
 	table.table-security{border:1px solid #ccf;width:100%;border-collapse:collapse;border:1px solid #8892BF}
 	table.table-security > thead > tr{background:#ccf}
 	table.table-security > thead > tr > th{background:#8892BF;padding:3px 5px;color:#fff;text-align:left;border-bottom:1px solid #8892BF;border-radius:0!important;text-transform:none;}
@@ -133,8 +133,25 @@
 							</thead>
 							<tbody>
 								<?php foreach ($scan['scan_data']['new'] as $file_name => $file_data): ?>
+								
+								<?php
+									$tree_storage_links = '';
+									if (isset($file_data['diff']['sha1'])) {
+										$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['diff']['sha1'][0] . ',' . $file_data['diff']['sha1'][1] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-copy"></i>';
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links .= '&nbsp;<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										}
+									} else {
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										} else {
+											$tree_storage_links = '';
+										}
+									} 
+								?>
+								
 								<tr>
-									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
+									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a>&nbsp;<?php echo $tree_storage_links ?></td>
 									<td><?php echo $file_data['extension'] ?></td>
 									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="column_size"><?php echo $file_data['filesize']; ?></td>
 									<td data-sort="<?php echo $file_data['int_filemtime'] ?>"><?php echo $file_data['filemtime'] ?></td>
@@ -172,8 +189,24 @@
 							</thead>
 							<tbody>
 								<?php foreach ($scan['scan_data']['changed'] as $file_name => $file_data): ?>
+									
+								<?php
+									if (isset($file_data['diff']['sha1'])) {
+										$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['diff']['sha1'][0] . ',' . $file_data['diff']['sha1'][1] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-copy"></i>';
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links .= '&nbsp;<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										}
+									} else {
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										} else {
+											$tree_storage_links = '';
+										}
+									} 
+								?>
+								
 								<tr>
-									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
+									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a>&nbsp;<?php echo $tree_storage_links ?></td>
 									<td><?php echo $file_data['extension'] ?></td>
 									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="<?php echo isset($file_data['diff']['filesize']) ? 'changed column_size' : 'column_size'; ?>"><?php echo $file_data['filesize']; ?></td>
 									<td data-sort="<?php echo $file_data['int_filemtime'] ?>" class="<?php echo isset($file_data['diff']['filemtime']) ? 'changed' : ''; ?>"><?php echo $file_data['filemtime']; ?></td>
@@ -210,8 +243,24 @@
 							</thead>
 							<tbody>
 								<?php foreach ($scan['scan_data']['deleted'] as $file_name => $file_data): ?>
+									
+								<?php
+									if (isset($file_data['diff']['sha1'])) {
+										$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['diff']['sha1'][0] . ',' . $file_data['diff']['sha1'][1] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-copy"></i>';
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links .= '&nbsp;<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										}
+									} else {
+										if (isset($file_data['sha1'])) {
+											$tree_storage_links = '<a href="' . $action_file . '&sha1=' . $file_data['sha1'] . '&extension=' . $file_data['extension'] .'" target="_blank"><i class="fa fa-eye"></i>';
+										} else {
+											$tree_storage_links = '';
+										}
+									} 
+								?>
+								
 								<tr>
-									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a></td>
+									<td><a href="<?php echo $action_file ?>&file_name=<?php echo urlencode($file_name) ?>" target="_blank"><?php echo $file_data['relpath'] ?></a>&nbsp;<?php echo $tree_storage_links ?></td>
 									<td><?php echo $file_data['extension'] ?></td>
 									<td data-sort="<?php echo $file_data['int_filesize'] ?>" class="column_size"><?php echo $file_data['filesize']; ?></td>
 									<td data-sort="<?php echo $file_data['int_filemtime'] ?>"><?php echo $file_data['filemtime'] ?></td>
@@ -320,8 +369,12 @@ var showScanned = function() {
 			html += '</thead>';
 			html += '<tbody>';
 				$.each(scanned_files, function(index, val) {
+				let tree_storage_links = '';
+				if (val?.sha1 !== undefined) {
+					tree_storage_links = '<a href="<?php echo $action_file ?>&sha1=' + val['sha1'] + '&extension=' + val['extension'] + '" target="_blank"><i class="fa fa-eye"></i>';
+				}
 				html += '<tr>';
-					html += '<td><a href="<?php echo $action_file ?>&file_name=' + index + '" target="_blank">' + val['relpath'] + '</a></td>';
+					html += '<td><a href="<?php echo $action_file ?>&file_name=' + index + '" target="_blank">' + val['relpath'] + '</a>&nbsp;' + tree_storage_links + '</td>';
 					html += '<td>' + val['extension'] + '</td>';
 					html += '<td data-sort="' + val['int_filesize'] + '" class="column_size">' + val['filesize'] + '</td>';
 					html += '<td data-sort="' + val['int_filemtime'] + '">' + val['filemtime'] + '</td>';
