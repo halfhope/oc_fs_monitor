@@ -3,15 +3,144 @@
 <head>
 	<meta charset="utf-8">
 	<title>{{ heading_title }}</title>
-	<style type="text/css" media="screen">#editor{position:absolute;top:0;right:0;bottom:0;left: 0;}</style>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
+	<style>
+		/* meyer-reset.min.css@2.0 */
+		html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}table{border-collapse:collapse;border-spacing:0}
+	</style>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
-<div id="editor">{{ content|escape }}</div>
-<script>
-	var editor = ace.edit("editor");
-	editor.setTheme("ace/theme/chrome");
-	editor.getSession().setMode("ace/mode/{{ mode }}");
-</script>
+{% if (mode is defined) %}
+	<style type="text/css" media="screen">#editor{display:none;position:absolute;top:0;right:0;bottom:0;left:0;}</style>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.min.js"></script>
+
+	<div id="editor">{{ content|escape }}</div>
+	<script>
+		$(document).ready(function() {
+			$('#editor').show();
+			ace.config.set('basePath', '//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11');
+			let editor = ace.edit('editor');
+			editor.setTheme('ace/theme/chrome');
+			editor.getSession().setMode('{{ mode }}');
+		});
+	</script>
+{% else %}
+	<div id="bar">
+		<label for="synchronized_scroll">
+			<input type="checkbox" id="synchronized_scroll" name="synchronized_scroll" checked> {{ text_synchronized_scroll }}
+		</label>
+	</div>
+	<div id="acediff" class="acediff"></div>
+	
+	<style>#bar{box-shadow:0px 0px 5px 0px #444;z-index:999999;display:block;position:relative;font-family:Consolas;font-size:10pt;padding:8px 16px;}#acediff>div.acediff__wrap{top:40px;height:unset}</style>
+	<link href="//unpkg.com/ace-diff@^3.0.0/dist/ace-diff.min.css" rel="stylesheet">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11/ace.min.js"></script>
+	<script src="//unpkg.com/ace-diff@^3.0.0"></script>
+	<script>
+		let synchronizedScroll = true;
+		let inSync = false;
+
+		$(document).ready(function() {
+			ace.config.set('basePath', '//cdnjs.cloudflare.com/ajax/libs/ace/1.4.11');
+			let aceConfig = {{ ace_diff_config }};
+			let differ = new AceDiff(aceConfig);
+			let left = differ.editors.left.ace;
+			let right = differ.editors.right.ace;
+			
+			let dmp = new diff_match_patch();
+			let currentDiffs = [];
+			
+			function updateDiffs() {
+				currentDiffs = dmp.diff_main(left.getValue(), right.getValue(), true);
+				dmp.diff_cleanupSemantic(currentDiffs); 
+			}
+			
+			updateDiffs();
+			
+			left.on('change', updateDiffs);
+			right.on('change', updateDiffs);
+			
+			function getLineCount(text) {
+				return text ? text.split('\n').length - 1 : 0;
+			}
+			
+			function getRightLineForLeft(leftLine) {
+				let cl = 0; 
+				let cr = 0; 
+				for (let d of currentDiffs) {
+					let op = d[0];
+					let text = d[1];
+					let lines = getLineCount(text);
+					if (op === 0) { 
+						if (cl + lines > leftLine) {
+							return cr + (leftLine - cl);
+						}
+						cl += lines;
+						cr += lines;
+					} else if (op === -1) { 
+						if (cl + lines > leftLine) {
+							return cr;
+						}
+						cl += lines;
+					} else if (op === 1) { 
+						cr += lines;
+					}
+				}
+				return cr;
+			}
+			
+			function getLeftLineForRight(rightLine) {
+				let cl = 0;
+				let cr = 0;
+				for (let d of currentDiffs) {
+					let op = d[0];
+					let text = d[1];
+					let lines = getLineCount(text);
+					if (op === 0) {
+						if (cr + lines > rightLine) {
+							return cl + (rightLine - cr);
+						}
+						cl += lines;
+						cr += lines;
+					} else if (op === 1) { 
+						if (cr + lines > rightLine) {
+							return cl;
+						}
+						cr += lines;
+					} else if (op === -1) { 
+						cl += lines;
+					}
+				}
+				return cl;
+			}
+			
+			left.session.on('changeScrollTop', function() {
+				if (synchronizedScroll && !inSync) {
+					inSync = true;
+					let topRow = left.renderer.getFirstVisibleRow();
+					let corrRow = getRightLineForLeft(topRow);
+					right.scrollToRow(corrRow);
+					inSync = false;
+				}
+			});
+			
+			right.session.on('changeScrollTop', function() {
+				if (synchronizedScroll && !inSync) {
+					inSync = true;
+					let topRow = right.renderer.getFirstVisibleRow();
+					let corrRow = getLeftLineForRight(topRow);
+					left.scrollToRow(corrRow);
+					inSync = false;
+				}
+			});
+		});
+
+		$('#synchronized_scroll').on('change', function(event) {
+			synchronizedScroll = $('#synchronized_scroll').is(':checked');
+			console.log(synchronizedScroll);
+		});
+	</script>
+{% endif %}
 </body>
 </html>

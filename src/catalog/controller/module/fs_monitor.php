@@ -23,20 +23,24 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 		$this->directory_scanner = new Security\directory_scanner();
 		$this->fs_scans = new Security\fs_scans();
 
+		$tree_storage_directory = DIR_SYSTEM . implode(DIRECTORY_SEPARATOR, ['storage', 'tree_storage']);
+		self::createDirectory($tree_storage_directory);
+		$this->tree_storage = new Security\tree_storage($tree_storage_directory);
+
 		// add include paths
-		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include')));
+		$include_paths   = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_include') ?? ''));
 		$include_paths[] = $this->config->get('security_fs_base_path');
 		$this->directory_scanner->setIncludePaths($include_paths);
 
 		// add exclude paths
-		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude')));
+		$exclude_paths = array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_exclude') ?? ''));
 		$this->directory_scanner->setExcludePaths($exclude_paths);
 		
 		// add default replace path
 		$this->directory_scanner->setReplacePath(realpath(DIR_APPLICATION . '..') . DIRECTORY_SEPARATOR);
 		
 		// add extensions
-		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions'))));
+		$this->directory_scanner->setExtensions(array_map('trim', explode(PHP_EOL, $this->config->get('security_fs_extensions') ?? '')));
 
 		// check access_key
 		if (isset($this->request->get['access_key']) && $this->request->get['access_key'] == $this->config->get('security_fs_cron_access_key')) {
@@ -48,6 +52,20 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 
 			$files = $this->directory_scanner->getFiles();
 			$scan_size = $this->fs_scans->getScanSize($files);
+
+			if ($this->config->get('security_fs_enable_tree_storage')) {
+				// append files into storage 
+				foreach ($files as $file_path => $file_data) {
+					$content = file_get_contents($file_path);
+					$hash = hash('sha1', $content);
+					
+					if (!$this->tree_storage->is_exists($hash)) {
+						$this->tree_storage->set($hash, $content);
+					}
+					
+					$files[$file_path]['sha1'] = $hash;
+				}
+			}
 
 			// Compare scans
 			$current_scan = [
@@ -177,4 +195,21 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 		return $scan_id;
 	}
 
+	/**
+	 * recursive create directory
+	 * @param 	string 	$path
+	 * @param 	int 	$permissions
+	 * @return 	bool
+	 **/
+	public static function createDirectory($path, $permissions = 0755) {
+		if (is_dir($path)) {
+			return true;
+		}
+		
+		if (mkdir($path, $permissions, true)) {
+			return true;
+		} else {
+			throw new \Exception("Can't create directory: " . $path);
+		}
+	}
 }

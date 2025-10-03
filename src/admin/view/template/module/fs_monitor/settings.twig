@@ -1,4 +1,9 @@
 {{ header }}
+<style>
+.form-group+.form-group{border:none}
+.ajax-message{display:inline-block}
+.ajax-message>.label{position:relative;top:6px;left:10px;font-size:unset}
+</style>
 {{ column_left }}
 <div id="content">
 <style>.row mb-3+.row mb-3{border:none}</style>
@@ -86,6 +91,38 @@
 		<div class="help-block">{{ entry_exclude_help_block }}</div>
 							</div>
 						</div>
+						
+					</fieldset>
+
+					<fieldset>
+
+						<legend>{{ text_legend_tree_storage }}</legend>
+
+						<div class="row mb-3">
+							<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_enable_tree_storage_help }}">{{ entry_enable_tree_storage }}</span></label>
+							<div class="col-sm-10">
+								<label class="radio-inline mt-2">
+									{% if (security_fs_enable_tree_storage) %}
+									<input type="radio" name="security_fs_enable_tree_storage" value="1" checked="checked" />
+									{{ text_yes }}
+									{% else %}
+									<input type="radio" name="security_fs_enable_tree_storage" value="1" />
+									{{ text_yes }}
+									{% endif %}
+								</label>
+								<label class="radio-inline mt-2">
+									{% if (not security_fs_enable_tree_storage) %}
+									<input type="radio" name="security_fs_enable_tree_storage" value="0" checked="checked" />
+									{{ text_no }}
+									{% else %}
+									<input type="radio" name="security_fs_enable_tree_storage" value="0" />
+									{{ text_no }}
+									{% endif %}
+								</label>
+								<div class="ajax-message"></div>
+							</div>
+						</div>
+
 					</fieldset>
 
 					<fieldset>
@@ -126,7 +163,7 @@
 						<div class="row mb-3">
 							<label class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_save_help }}">{{ entry_cron_save }}</span></label>
 							<div class="col-sm-10">
-								<label class="radio-inline">
+								<label class="radio-inline mt-2">
 									{% if security_fs_cron_save %}
 									<input type="radio" name="security_fs_cron_save" value="1" checked="checked" />
 									{{ text_yes }}
@@ -135,7 +172,7 @@
 									{{ text_yes }}
 									{% endif %}
 								</label>
-								<label class="radio-inline">
+								<label class="radio-inline mt-2">
 									{% if security_fs_cron_save == false %}
 									<input type="radio" name="security_fs_cron_save" value="0" checked="checked" />
 									{{ text_no }}
@@ -157,7 +194,7 @@
 							
 							<label for="" class="col-sm-2 col-form-label"><span data-bs-toggle="tooltip" title="{{ entry_cron_notify_help }}">{{ entry_cron_notify }}</span></label>
 							<div class="col-sm-10">
-								<label class="radio-inline">
+								<label class="radio-inline mt-2">
 									{% if security_fs_cron_notify %}
 									<input type="radio" name="security_fs_cron_notify" value="1" checked="checked" />
 									{{ text_yes }}
@@ -166,7 +203,7 @@
 									{{ text_yes }}
 									{% endif %}
 								</label>
-								<label class="radio-inline">
+								<label class="radio-inline mt-2">
 									{% if not security_fs_cron_notify %}
 									<input type="radio" name="security_fs_cron_notify" value="0" checked="checked" />
 									{{ text_no }}
@@ -276,6 +313,17 @@ $(document).ready(function($) {
 		$(output_field).val($(output_field).data('default') + $(this).val() + '\'');
 
 	}).trigger('change');
+
+	$.ajax({
+		type: "POST",
+		url: "{{ action_get_tree_storage_size }}",
+		dataType: "json",
+		success: function (response) {
+			if (response.success) {
+				$('.ajax-message').append('<div class="label label-success">' + response.success + '</div>');
+			}
+		}
+	});
 });
 </script>
 {{ footer }}

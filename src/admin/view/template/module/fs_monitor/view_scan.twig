@@ -4,7 +4,7 @@
 	.scan-name{cursor:pointer}
 	span.label{font-size:10pt}
 	table.table-security{table-layout:fixed}
-	table.table-security *{font-family:Consolas;font-size:9pt}
+	table.table-security {font-family:Consolas;font-size:9pt}
 	table.table-security{border:1px solid #ccf;width:100%;border-collapse:collapse;border:1px solid #8892BF}
 	table.table-security > thead > tr{background:#ccf}
 	table.table-security > thead > tr > th{background:#8892BF;padding:3px 5px;color:#fff;text-align:left;border-bottom:1px solid #8892BF;border-radius:0!important;text-transform:none;}
@@ -133,8 +133,23 @@
 							</thead>
 							<tbody>
 								{% for file_name, file_data in scan.scan_data.new %}
+								{% set tree_storage_links = '' %}
+								{% if file_data.diff.sha1 is defined %}
+									{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.diff.sha1[0] ~ ',' ~ file_data.diff.sha1[1] ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-copy"></i>' %}
+
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = tree_storage_links ~ '&nbsp;<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% endif %}
+								{% else %}
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% else %}
+										{% set tree_storage_links = '' %}
+									{% endif %}
+								{% endif %}
+								
 								<tr>
-									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a></td>
+									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a>&nbsp;{{ tree_storage_links|raw }}</td>
 									<td>{{ file_data.extension }}</td>
 									<td data-sort="{{ file_data.int_filesize }}" class="column_size">{{ file_data.filesize }}</td>
 									<td data-sort="{{ file_data.int_filemtime }}">{{ file_data.filemtime }}</td>
@@ -172,8 +187,23 @@
 							</thead>
 							<tbody>
 								{% for file_name, file_data in scan.scan_data.changed %}
+								{% set tree_storage_links = '' %}
+								{% if file_data.diff.sha1 is defined %}
+									{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.diff.sha1[0] ~ ',' ~ file_data.diff.sha1[1] ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-copy"></i>' %}
+
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = tree_storage_links ~ '&nbsp;<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% endif %}
+								{% else %}
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% else %}
+										{% set tree_storage_links = '' %}
+									{% endif %}
+								{% endif %}
+
 								<tr>
-									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a></td>
+									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a>&nbsp;{{ tree_storage_links|raw }}</td>
 									<td>{{ file_data.extension }}</td>
 									<td data-sort="{{ file_data.int_filesize }}" class="{{ (file_data.diff.filesize is defined) ? 'changed column_size' : 'class="column_size"' }}">{{ file_data.filesize }}</td>
 									<td data-sort="{{ file_data.int_filemtime }}" class="{{ (file_data.diff.filemtime is defined) ? 'changed' : '' }}">{{ file_data.filemtime }}</td>
@@ -211,8 +241,23 @@
 							</thead>
 							<tbody>
 								{% for file_name, file_data in scan.scan_data.deleted %}
+								{% set tree_storage_links = '' %}
+								{% if file_data.diff.sha1 is defined %}
+									{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.diff.sha1[0] ~ ',' ~ file_data.diff.sha1[1] ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-copy"></i>' %}
+
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = tree_storage_links ~ '&nbsp;<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% endif %}
+								{% else %}
+									{% if file_data.sha1 is defined %}
+										{% set tree_storage_links = '<a href="' ~ action_file ~ '&sha1=' ~ file_data.sha1 ~ '&extension=' ~ file_data.extension ~ '" target="_blank"><i class="fa fa-eye"></i>' %}
+									{% else %}
+										{% set tree_storage_links = '' %}
+									{% endif %}
+								{% endif %}
+								
 								<tr>
-									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a></td>
+									<td><a href="{{ action_file }}&file_name={{ file_name|url_encode }}" target="_blank">{{ file_data.relpath }}</a>&nbsp;{{ tree_storage_links|raw }}</td>
 									<td>{{ file_data.extension }}</td>
 									<td data-sort="{{ file_data.int_filesize }}" class="column_size">{{ file_data.filesize }}</td>
 									<td data-sort="{{ file_data.int_filemtime }}">{{ file_data.filemtime }}</td>

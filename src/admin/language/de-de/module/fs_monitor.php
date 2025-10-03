@@ -45,11 +45,17 @@ $_['text_view_all']					= 'Alle ansehen';
 $_['text_dashboard_scan']			= 'Übersicht';
 $_['text_initial_scan']				= 'Erstscan';
 $_['text_date_format_short']		= 'j. F';
+$_['text_tree_storage_size']        = 'Aktuelle Speichergröße: %s';
 
 $_['text_legend_module']			= 'Module';
 $_['text_legend_scanner']			= 'Scanner';
+$_['text_legend_tree_storage']	    = 'Code-Speicher';
 $_['text_legend_cron_opencart']		= 'Сron - OpenCart';
 $_['text_legend_notify']            = 'Benachrichtigungen';
+
+// View File
+$_['text_view_file']                = 'Datei anzeigen';
+$_['text_synchronized_scroll']      = 'Synchronisiertes Scrollen';
 
 // Columns
 $_['text_column_name']				= 'Name';
@@ -81,6 +87,8 @@ $_['entry_include_help_block']		= 'Nur absolute Pfade dürfen vewendet werden<br
 $_['entry_exclude']					= 'Ausgenommen Verzeichnisse und Dateien';
 $_['entry_exclude_help']			= 'Pro Zeile eine Angabe';
 $_['entry_exclude_help_block']		= 'Es können sowohl absolute als auch relative Pfade angegeben werden, auch Wildcards *.<br>Beispiel:<ul><li>/var/www/username/www-data/andere_webseite.com/</li><li>catalog/view/theme/revolution/stylesheet/ocdbanner-206.css</li><li>assets/dynamic_stylesheet/*.css</li></ul>';
+$_['entry_enable_tree_storage']     = 'Code-Speicher für Dateien aktivieren';
+$_['entry_enable_tree_storage_help'] = 'Alle Dateien werden komprimiert und in den Ordner system/storage/tree_storage platziert. Dies ermöglicht die Ansicht von Änderungen in Dateien.';
 $_['entry_notify_to'] 	            = 'Notify to';
 
 $_['tab_email'] 	                = 'Email';
