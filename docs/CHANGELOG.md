@@ -50,3 +50,7 @@
 
 * fix: Replaced deprecated function strftime
 
+#### 1.3
+
+* feature: Added code storage support for viewing file diffs
+

@@ -31,7 +31,10 @@ The extension allows:
 
 ## Compatibility
 
-* OpenCart 1.5, 2.x, 3.x, 4.x versions.
+Starting from version 1.3, support for OpenCart versions below 2.3 will be discontinued.
+
+* OpenCart 1.5, 2.1, 2.2 - Latest compatible version 1.2.3.1
+* Opencart 2.3, 3.x, 4.x 
 
 ## Dependencies
 
