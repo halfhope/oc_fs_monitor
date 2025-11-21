@@ -117,7 +117,9 @@ class Directory_scanner {
 
 	private static function normalizePath($path, $encoding = "UTF-8") {
 		// Attempt to avoid path encoding problems.
-		$path  = iconv($encoding, "$encoding//IGNORE//TRANSLIT", $path);
+		if (function_exists('iconv')) {
+			$path  = iconv($encoding, "$encoding//IGNORE//TRANSLIT", $path);
+		}
 		// Process the components
 		$parts = explode('/', $path);
 		$safe  = [];
