@@ -9,7 +9,7 @@ class FSMonitor extends \Opencart\System\Engine\Controller {
 
 	private	$_route 			= 'extension/fs_monitor/module/fs_monitor';
 	private	$_model 			= 'model_extension_fs_monitor_module_fs_monitor';
-	private	$_version 			= '1.3';
+	private	$_version 			= '1.3.1';
 	private	$_dashboard_route	= 'extension/fs_monitor/module/fs_monitor';
 	private	$_extensions_route 	= 'marketplace/extension';
 
