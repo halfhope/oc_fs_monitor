@@ -54,3 +54,6 @@
 
 * feature: Added code storage support for viewing file diffs
 
+#### 1.3.1
+
+* fix: Add iconv existence check
