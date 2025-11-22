@@ -7,7 +7,7 @@ class ControllerExtensionModuleFsMonitor extends Controller {
 
 	private	$_route 			= 'extension/module/fs_monitor';
 	private	$_model 			= 'model_extension_module_fs_monitor';
-	private	$_version 			= '1.3';
+	private	$_version 			= '1.3.1';
 	private	$_dashboard_route	= 'extension/dashboard/fs_monitor';
 	private	$_extensions_route 	= 'extension/extension';
 
